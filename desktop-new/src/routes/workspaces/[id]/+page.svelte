@@ -1,7 +1,155 @@
 <script lang="ts">
 import { page } from "$app/stores"
+import { goto } from "$app/navigation"
+import { onMount, onDestroy } from "svelte"
+import { Button } from "$lib/components/ui/button/index.js"
+import { badgeVariants } from "$lib/components/ui/badge/index.js"
+import { Separator } from "$lib/components/ui/separator/index.js"
+import * as Tabs from "$lib/components/ui/tabs/index.js"
+import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
+import { workspaces } from "$lib/stores/workspaces.js"
+import {
+  workspaceStop,
+  workspaceRebuild,
+  workspaceDelete,
+} from "$lib/ipc/commands.js"
+import { onCommandProgress } from "$lib/ipc/events.js"
+import type { UnlistenFn } from "@tauri-apps/api/event"
 
 let id = $derived($page.params.id)
+let workspace = $derived($workspaces.find((ws) => ws.id === id))
+
+let outputLines = $state<string[]>([])
+let unlisten: UnlistenFn | null = null
+
+onMount(async () => {
+  try {
+    unlisten = await onCommandProgress((progress) => {
+      if (progress.message) {
+        outputLines = [...outputLines, progress.message]
+      }
+    })
+  } catch {
+    // Event listener setup failed
+  }
+})
+
+onDestroy(() => {
+  unlisten?.()
+})
+
+async function handleStop() {
+  try {
+    await workspaceStop(id)
+  } catch {
+    // handled by event system
+  }
+}
+
+async function handleRebuild() {
+  try {
+    await workspaceRebuild(id)
+  } catch {
+    // handled by event system
+  }
+}
+
+async function handleDelete() {
+  try {
+    await workspaceDelete(id)
+    goto("/workspaces")
+  } catch {
+    // handled by event system
+  }
+}
 </script>
 
-<h1 class="text-2xl font-bold">Workspace: {id}</h1>
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <Button variant="ghost" size="sm" onclick={() => goto("/workspaces")}>
+      &larr; Back
+    </Button>
+    <h1 class="text-2xl font-bold">{id}</h1>
+    {#if workspace?.provider?.name}
+      <span class={badgeVariants({ variant: "secondary" })}>{workspace.provider.name}</span>
+    {/if}
+    {#if workspace?.status}
+      <span class={badgeVariants({ variant: "default" })}>{workspace.status}</span>
+    {/if}
+  </div>
+
+  <div class="flex gap-2">
+    <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
+    <Button variant="outline" size="sm" onclick={handleRebuild}>Rebuild</Button>
+    <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
+  </div>
+
+  <Separator />
+
+  {#if !workspace}
+    <p class="text-muted-foreground">Workspace not found.</p>
+  {:else}
+    <Tabs.Root value="overview">
+      <Tabs.List>
+        <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
+        <Tabs.Trigger value="output">Live Output</Tabs.Trigger>
+      </Tabs.List>
+
+      <Tabs.Content value="overview">
+        <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <div class="text-muted-foreground">ID</div>
+          <div>{workspace.id}</div>
+
+          <div class="text-muted-foreground">UID</div>
+          <div>{workspace.uid ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Provider</div>
+          <div>{workspace.provider?.name ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Machine</div>
+          <div>{workspace.machine?.id ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">IDE</div>
+          <div>{workspace.ide?.name ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Source</div>
+          <div class="truncate">
+            {workspace.source?.gitRepository
+              ?? workspace.source?.localFolder
+              ?? workspace.source?.image
+              ?? "N/A"}
+          </div>
+
+          {#if workspace.source?.gitBranch}
+            <div class="text-muted-foreground">Branch</div>
+            <div>{workspace.source.gitBranch}</div>
+          {/if}
+
+          <div class="text-muted-foreground">Status</div>
+          <div>{workspace.status ?? "Unknown"}</div>
+
+          <div class="text-muted-foreground">Created</div>
+          <div>{workspace.creationTimestamp ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Last Used</div>
+          <div>{workspace.lastUsedTimestamp ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Context</div>
+          <div>{workspace.context ?? "N/A"}</div>
+        </div>
+      </Tabs.Content>
+
+      <Tabs.Content value="output">
+        <ScrollArea class="mt-4 h-96 rounded-md border bg-muted/50 p-4">
+          {#if outputLines.length === 0}
+            <p class="text-sm text-muted-foreground">
+              No output yet. Run a command to see live output.
+            </p>
+          {:else}
+            <pre class="text-xs font-mono whitespace-pre-wrap">{outputLines.join("\n")}</pre>
+          {/if}
+        </ScrollArea>
+      </Tabs.Content>
+    </Tabs.Root>
+  {/if}
+</div>

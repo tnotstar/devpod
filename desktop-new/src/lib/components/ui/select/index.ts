@@ -5,7 +5,6 @@ import Trigger from "./select-trigger.svelte"
 
 const Root = SelectPrimitive.Root
 const Group = SelectPrimitive.Group
-const Value = SelectPrimitive.Value
 
 export {
   Content,
@@ -18,6 +17,4 @@ export {
   Root as Select,
   Trigger,
   Trigger as SelectTrigger,
-  Value,
-  Value as SelectValue,
 }
