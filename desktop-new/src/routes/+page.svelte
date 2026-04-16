@@ -11,7 +11,9 @@ import { machines } from "$lib/stores/machines.js"
 import { activeContext } from "$lib/stores/contexts.js"
 import { auditRecent, workspaceStop } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
+import { Box, Plug, Server } from "lucide-svelte"
 import type { AuditEntry } from "$lib/types/index.js"
+import type { Component } from "svelte"
 
 let activity = $state<AuditEntry[]>([])
 
@@ -43,6 +45,7 @@ const stats = $derived([
     label: "Workspaces",
     count: $workspaces.length,
     href: "/workspaces",
+    icon: Box as Component<{ class?: string }>,
     sub:
       runningWorkspaces.length > 0
         ? `${runningWorkspaces.length} running`
@@ -52,18 +55,34 @@ const stats = $derived([
     label: "Providers",
     count: $providers.length,
     href: "/providers",
+    icon: Plug as Component<{ class?: string }>,
     sub: undefined as string | undefined,
   },
   {
     label: "Machines",
     count: $machines.length,
     href: "/machines",
+    icon: Server as Component<{ class?: string }>,
     sub:
       runningMachines.length > 0
         ? `${runningMachines.length} running`
         : undefined,
   },
 ])
+
+function resourceHref(entry: AuditEntry): string | null {
+  if (!entry.resourceId) return null
+  switch (entry.resourceType) {
+    case "workspace":
+      return `/workspaces/${entry.resourceId}`
+    case "provider":
+      return `/providers/${entry.resourceId}`
+    case "machine":
+      return `/machines/${entry.resourceId}`
+    default:
+      return null
+  }
+}
 
 async function quickStop(wsId: string) {
   try {
@@ -87,12 +106,16 @@ async function quickStop(wsId: string) {
 
   <div class="grid gap-4 sm:grid-cols-3">
     {#each stats as stat (stat.label)}
+      {@const Icon = stat.icon}
       <button
         type="button"
         class="rounded-lg border bg-card p-6 text-left text-card-foreground shadow-sm transition-colors hover:bg-accent/50"
         onclick={() => goto(stat.href)}
       >
-        <div class="text-3xl font-bold">{stat.count}</div>
+        <div class="flex items-center justify-between">
+          <div class="text-3xl font-bold">{stat.count}</div>
+          <Icon class="h-5 w-5 text-muted-foreground" />
+        </div>
         <div class="mt-1 text-sm text-muted-foreground">{stat.label}</div>
         {#if stat.sub}
           <div class="mt-1 text-xs text-green-600 dark:text-green-400">{stat.sub}</div>
@@ -151,6 +174,7 @@ async function quickStop(wsId: string) {
       <ScrollArea class="h-64 rounded-md border">
         <div class="divide-y">
           {#each activity as entry}
+            {@const href = resourceHref(entry)}
             <div class="flex items-center gap-3 px-4 py-3">
               <span
                 class={badgeVariants({
@@ -163,7 +187,11 @@ async function quickStop(wsId: string) {
                 <span class="text-sm">
                   {entry.resourceType}
                   {#if entry.resourceId}
-                    <span class="font-medium">{entry.resourceId}</span>
+                    {#if href}
+                      <a class="font-medium hover:underline" {href}>{entry.resourceId}</a>
+                    {:else}
+                      <span class="font-medium">{entry.resourceId}</span>
+                    {/if}
                   {/if}
                 </span>
               </div>
