@@ -1,7 +1,11 @@
 <script lang="ts">
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
-import { contexts, activeContext } from "$lib/stores/contexts.js"
+import {
+  contexts,
+  activeContext,
+  contextsLoading,
+} from "$lib/stores/contexts.js"
 import { contextUse } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 
@@ -20,7 +24,13 @@ async function handleUse(name: string) {
     <h1 class="text-2xl font-bold">Contexts</h1>
   </div>
 
-  {#if $contexts.length === 0}
+  {#if $contextsLoading}
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {#each Array(2) as _}
+        <div class="h-28 animate-pulse rounded-lg border bg-muted"></div>
+      {/each}
+    </div>
+  {:else if $contexts.length === 0}
     <p class="text-muted-foreground">No contexts found.</p>
   {:else}
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

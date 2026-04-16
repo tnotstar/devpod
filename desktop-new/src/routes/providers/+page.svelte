@@ -3,7 +3,7 @@ import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import ProviderCard from "$lib/components/provider/ProviderCard.svelte"
-import { providers } from "$lib/stores/providers.js"
+import { providers, providersLoading } from "$lib/stores/providers.js"
 
 let search = $state("")
 let sortBy = $state<"name" | "version">("name")
@@ -52,7 +52,13 @@ let filtered = $derived.by(() => {
     </select>
   </div>
 
-  {#if filtered.length === 0}
+  {#if $providersLoading}
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {#each Array(3) as _}
+        <div class="h-32 animate-pulse rounded-lg border bg-muted"></div>
+      {/each}
+    </div>
+  {:else if filtered.length === 0}
     <div class="flex flex-col items-center justify-center gap-4 py-16 text-center">
       <p class="text-muted-foreground">
         {search ? "No providers match your search." : "No providers configured yet."}

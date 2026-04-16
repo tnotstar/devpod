@@ -5,15 +5,19 @@ import { onMachinesChanged } from "$lib/ipc/events.js"
 import type { Machine } from "$lib/types/index.js"
 
 export const machines = writable<Machine[]>([])
+export const machinesLoading = writable(true)
 
 let unlisten: UnlistenFn | null = null
 
 export async function initMachines() {
+  machinesLoading.set(true)
   try {
     const list = await machineList()
     machines.set(list)
   } catch {
     // Tauri not available
+  } finally {
+    machinesLoading.set(false)
   }
 
   try {
