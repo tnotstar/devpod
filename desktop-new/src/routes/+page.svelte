@@ -9,7 +9,8 @@ import { workspaces } from "$lib/stores/workspaces.js"
 import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import { activeContext } from "$lib/stores/contexts.js"
-import { auditRecent } from "$lib/ipc/commands.js"
+import { auditRecent, workspaceStop } from "$lib/ipc/commands.js"
+import { toasts } from "$lib/stores/toasts.js"
 import type { AuditEntry } from "$lib/types/index.js"
 
 let activity = $state<AuditEntry[]>([])
@@ -30,11 +31,48 @@ function formatTimestamp(ts: string): string {
   }
 }
 
+let runningWorkspaces = $derived(
+  $workspaces.filter((ws) => ws.status?.toLowerCase() === "running"),
+)
+let runningMachines = $derived(
+  $machines.filter((m) => m.status?.toLowerCase() === "running"),
+)
+
 const stats = $derived([
-  { label: "Workspaces", count: $workspaces.length, href: "/workspaces" },
-  { label: "Providers", count: $providers.length, href: "/providers" },
-  { label: "Machines", count: $machines.length, href: "/machines" },
+  {
+    label: "Workspaces",
+    count: $workspaces.length,
+    href: "/workspaces",
+    sub:
+      runningWorkspaces.length > 0
+        ? `${runningWorkspaces.length} running`
+        : undefined,
+  },
+  {
+    label: "Providers",
+    count: $providers.length,
+    href: "/providers",
+    sub: undefined as string | undefined,
+  },
+  {
+    label: "Machines",
+    count: $machines.length,
+    href: "/machines",
+    sub:
+      runningMachines.length > 0
+        ? `${runningMachines.length} running`
+        : undefined,
+  },
 ])
+
+async function quickStop(wsId: string) {
+  try {
+    await workspaceStop(wsId)
+    toasts.success(`Stopped ${wsId}`)
+  } catch (err) {
+    toasts.error(`Failed to stop: ${err}`)
+  }
+}
 </script>
 
 <div class="space-y-6">
@@ -56,6 +94,9 @@ const stats = $derived([
       >
         <div class="text-3xl font-bold">{stat.count}</div>
         <div class="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+        {#if stat.sub}
+          <div class="mt-1 text-xs text-green-600 dark:text-green-400">{stat.sub}</div>
+        {/if}
       </button>
     {/each}
   </div>
@@ -64,6 +105,40 @@ const stats = $derived([
     <Button onclick={() => goto("/workspaces/new")}>New Workspace</Button>
     <Button variant="outline" onclick={() => goto("/providers/add")}>Add Provider</Button>
   </div>
+
+  {#if runningWorkspaces.length > 0}
+    <div class="space-y-3">
+      <h2 class="text-lg font-semibold">Active Workspaces</h2>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {#each runningWorkspaces as ws (ws.id)}
+          <div class="flex items-center justify-between rounded-lg border bg-card p-4 shadow-sm">
+            <div class="min-w-0 flex-1">
+              <button
+                class="truncate font-medium hover:underline"
+                onclick={() => goto(`/workspaces/${ws.id}`)}
+              >
+                {ws.id}
+              </button>
+              <div class="flex items-center gap-2 mt-1">
+                {#if ws.provider?.name}
+                  <span class="text-xs text-muted-foreground">{ws.provider.name}</span>
+                {/if}
+                <span class={badgeVariants({ variant: "default" })}>{ws.status}</span>
+              </div>
+            </div>
+            <div class="ml-3 flex gap-1">
+              <Button variant="outline" size="sm" onclick={() => goto(`/workspaces/${ws.id}`)}>
+                Open
+              </Button>
+              <Button variant="ghost" size="sm" onclick={() => quickStop(ws.id)}>
+                Stop
+              </Button>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 
   <Separator />
 
