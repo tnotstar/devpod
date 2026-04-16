@@ -21,6 +21,8 @@ import type { ProviderOption } from "$lib/types/index.js"
 
 let id = $derived($page.params.id as string)
 let provider = $derived($providers.find((p) => p.name === id))
+let isSetup = $derived($page.url.searchParams.get("setup") === "true")
+let isInitialized = $derived(provider?.state?.initialized === true)
 
 let options = $state<Record<string, ProviderOption>>({})
 let optionValues = $state<Record<string, string>>({})
@@ -37,7 +39,18 @@ let isDirty = $derived.by(() => {
   return false
 })
 
+let requiredOptions = $derived.by(() => {
+  return Object.entries(options).filter(
+    ([, opt]) => opt.required && !opt.hidden,
+  )
+})
+
+let hasUnfilledRequired = $derived.by(() => {
+  return requiredOptions.some(([key]) => !optionValues[key]?.trim())
+})
+
 // Group options by their group field, with ungrouped options first
+// In setup mode, show required options first regardless of group
 let groupedOptions = $derived.by(() => {
   const groups: Record<string, [string, ProviderOption][]> = {}
   for (const [key, opt] of Object.entries(options)) {
@@ -45,6 +58,14 @@ let groupedOptions = $derived.by(() => {
     const group = opt.group ?? ""
     if (!groups[group]) groups[group] = []
     groups[group].push([key, opt])
+  }
+  // Sort required options first within each group
+  for (const entries of Object.values(groups)) {
+    entries.sort((a, b) => {
+      const aReq = a[1].required ? 0 : 1
+      const bReq = b[1].required ? 0 : 1
+      return aReq - bReq
+    })
   }
   return groups
 })
@@ -115,7 +136,12 @@ async function handleSaveOptions() {
     }
     await providerSetOptions(id, values)
     initialValues = { ...optionValues }
-    toasts.success("Options saved")
+    if (isSetup) {
+      toasts.success(`Provider ${id} configured successfully`)
+      goto("/providers")
+    } else {
+      toasts.success("Options saved")
+    }
   } catch (err) {
     toasts.error(`Failed to save options: ${err}`)
   } finally {
@@ -147,6 +173,20 @@ async function handleSaveOptions() {
   {#if !provider}
     <p class="text-muted-foreground">Provider not found.</p>
   {:else}
+    {#if isSetup && !loading && hasUnfilledRequired}
+      <div class="rounded-md border border-amber-500/50 bg-amber-500/10 p-4">
+        <h3 class="font-semibold text-amber-700 dark:text-amber-400">Configure required options</h3>
+        <p class="mt-1 text-sm text-amber-600 dark:text-amber-400/80">
+          This provider needs configuration before it can be used.
+          Fill in the required fields below and save.
+        </p>
+      </div>
+    {:else if !isInitialized && !loading}
+      <div class="rounded-md border border-muted bg-muted/50 p-3 text-sm text-muted-foreground">
+        This provider has not been initialized yet. Configure its options to get started.
+      </div>
+    {/if}
+
     {#if provider.description}
       <p class="text-muted-foreground">{provider.description}</p>
     {/if}
@@ -154,7 +194,9 @@ async function handleSaveOptions() {
     <Separator />
 
     <div class="space-y-4">
-      <h2 class="text-lg font-semibold">Options</h2>
+      <h2 class="text-lg font-semibold">
+        {isSetup ? "Configure Provider" : "Options"}
+      </h2>
 
       {#if loading}
         <p class="text-sm text-muted-foreground">Loading options...</p>
@@ -170,7 +212,7 @@ async function handleSaveOptions() {
 
           <div class="space-y-4">
             {#each entries as [key, opt] (key)}
-              <div class="space-y-1.5">
+              <div class="space-y-1.5 {isSetup && opt.required && !optionValues[key]?.trim() ? 'rounded-md border border-amber-500/30 bg-amber-500/5 p-3 -mx-3' : ''}"  >
                 <Label>
                   {opt.displayName ?? opt.name ?? key}
                   {#if opt.required}
@@ -206,9 +248,13 @@ async function handleSaveOptions() {
 
         <div class="flex items-center gap-3">
           <Button onclick={handleSaveOptions} disabled={saving || !isDirty}>
-            {saving ? "Saving..." : "Save Options"}
+            {saving ? "Saving..." : isSetup ? "Save & Finish Setup" : "Save Options"}
           </Button>
-          {#if isDirty}
+          {#if isSetup && !hasUnfilledRequired}
+            <Button variant="outline" onclick={() => goto("/providers")}>
+              Skip
+            </Button>
+          {:else if isDirty}
             <Button variant="outline" onclick={() => { optionValues = { ...initialValues } }}>
               Reset
             </Button>

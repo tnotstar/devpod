@@ -42,7 +42,7 @@ async function handleAdd(name: string, source?: string) {
   try {
     await providerAdd(name, source)
     toasts.success(`Added provider ${name}`)
-    goto("/providers")
+    goto(`/providers/${name}?setup=true`)
   } catch (err) {
     error = err instanceof Error ? err.message : String(err)
   } finally {
