@@ -1,56 +1,105 @@
 <script lang="ts">
 import { page } from "$app/stores"
 import { goto } from "$app/navigation"
-import { onMount } from "svelte"
+import { onMount, onDestroy } from "svelte"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Separator } from "$lib/components/ui/separator/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
+import * as Tabs from "$lib/components/ui/tabs/index.js"
+import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
 import { machines } from "$lib/stores/machines.js"
 import {
   machineStart,
   machineStop,
   machineDelete,
   machineStatus,
+  auditByResource,
 } from "$lib/ipc/commands.js"
+import { toasts } from "$lib/stores/toasts.js"
+import type { AuditEntry } from "$lib/types/index.js"
 
 let id = $derived($page.params.id)
 let machine = $derived($machines.find((m) => m.id === id))
 
 let status = $state<string | null>(null)
-let error = $state("")
+let polling = $state(false)
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+let auditEntries = $state<AuditEntry[]>([])
+let auditLoading = $state(false)
 
 onMount(async () => {
+  await refreshStatus()
+  loadAudit()
+
+  // Poll status every 5 seconds
+  pollTimer = setInterval(refreshStatus, 5000)
+})
+
+onDestroy(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
+
+async function refreshStatus() {
   try {
     status = await machineStatus(id)
   } catch {
     // Status fetch failed
   }
-})
+}
+
+async function loadAudit() {
+  auditLoading = true
+  try {
+    auditEntries = await auditByResource("machine", id)
+  } catch {
+    auditEntries = []
+  } finally {
+    auditLoading = false
+  }
+}
+
+function formatTimestamp(ts: string): string {
+  try {
+    return new Date(ts).toLocaleString()
+  } catch {
+    return ts
+  }
+}
 
 async function handleStart() {
+  polling = true
   try {
     await machineStart(id)
-    status = await machineStatus(id)
+    toasts.success(`Started ${id}`)
+    await refreshStatus()
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err)
+    toasts.error(`Failed to start: ${err}`)
+  } finally {
+    polling = false
   }
 }
 
 async function handleStop() {
+  polling = true
   try {
     await machineStop(id)
-    status = await machineStatus(id)
+    toasts.success(`Stopped ${id}`)
+    await refreshStatus()
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err)
+    toasts.error(`Failed to stop: ${err}`)
+  } finally {
+    polling = false
   }
 }
 
 async function handleDelete() {
   try {
     await machineDelete(id)
+    toasts.success(`Deleted ${id}`)
     goto("/machines")
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err)
+    toasts.error(`Failed to delete: ${err}`)
   }
 }
 </script>
@@ -64,17 +113,14 @@ async function handleDelete() {
     {#if status}
       <span class={badgeVariants({ variant: "default" })}>{status}</span>
     {/if}
+    {#if polling}
+      <span class="text-xs text-muted-foreground animate-pulse">updating...</span>
+    {/if}
   </div>
 
-  {#if error}
-    <div class="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-      {error}
-    </div>
-  {/if}
-
   <div class="flex gap-2">
-    <Button variant="outline" size="sm" onclick={handleStart}>Start</Button>
-    <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
+    <Button variant="outline" size="sm" onclick={handleStart} disabled={polling}>Start</Button>
+    <Button variant="outline" size="sm" onclick={handleStop} disabled={polling}>Stop</Button>
     <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
   </div>
 
@@ -83,21 +129,66 @@ async function handleDelete() {
   {#if !machine}
     <p class="text-muted-foreground">Machine not found.</p>
   {:else}
-    <div class="grid grid-cols-2 gap-4 text-sm">
-      <div class="text-muted-foreground">ID</div>
-      <div>{machine.id}</div>
+    <Tabs.Root value="details">
+      <Tabs.List>
+        <Tabs.Trigger value="details">Details</Tabs.Trigger>
+        <Tabs.Trigger value="activity">Activity</Tabs.Trigger>
+      </Tabs.List>
 
-      <div class="text-muted-foreground">Provider</div>
-      <div>{machine.provider?.name ?? "N/A"}</div>
+      <Tabs.Content value="details">
+        <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <div class="text-muted-foreground">ID</div>
+          <div>{machine.id}</div>
 
-      <div class="text-muted-foreground">Status</div>
-      <div>{status ?? machine.status ?? "Unknown"}</div>
+          <div class="text-muted-foreground">Provider</div>
+          <div>{machine.provider?.name ?? "N/A"}</div>
 
-      <div class="text-muted-foreground">Created</div>
-      <div>{machine.creationTimestamp ?? "N/A"}</div>
+          <div class="text-muted-foreground">Status</div>
+          <div>{status ?? machine.status ?? "Unknown"}</div>
 
-      <div class="text-muted-foreground">Last Used</div>
-      <div>{machine.lastUsedTimestamp ?? "N/A"}</div>
-    </div>
+          <div class="text-muted-foreground">Created</div>
+          <div>{machine.creationTimestamp ?? "N/A"}</div>
+
+          <div class="text-muted-foreground">Last Used</div>
+          <div>{machine.lastUsedTimestamp ?? "N/A"}</div>
+        </div>
+      </Tabs.Content>
+
+      <Tabs.Content value="activity">
+        <div class="mt-4 space-y-4">
+          {#if auditLoading}
+            <p class="text-sm text-muted-foreground">Loading activity...</p>
+          {:else if auditEntries.length === 0}
+            <p class="text-sm text-muted-foreground">
+              No activity recorded for this machine.
+            </p>
+          {:else}
+            <ScrollArea class="h-80 rounded-md border">
+              <div class="divide-y">
+                {#each auditEntries as entry}
+                  <div class="flex items-center gap-3 px-4 py-3">
+                    <span
+                      class={badgeVariants({
+                        variant: entry.success ? "default" : "destructive",
+                      })}
+                    >
+                      {entry.action}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                      {#if entry.details}
+                        <span class="text-sm text-muted-foreground">{entry.details}</span>
+                      {/if}
+                    </div>
+                    <span class="shrink-0 text-xs text-muted-foreground">
+                      {formatTimestamp(entry.timestamp)}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </ScrollArea>
+          {/if}
+        </div>
+      </Tabs.Content>
+    </Tabs.Root>
   {/if}
 </div>
