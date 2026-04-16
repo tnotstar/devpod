@@ -79,7 +79,7 @@ function resourceHref(entry: AuditEntry): string | null {
 async function quickStop(wsId: string) {
   try {
     await workspaceStop(wsId)
-    toasts.success(`Stopped ${wsId}`)
+    toasts.success(`Stopping ${wsId}...`)
   } catch (err) {
     toasts.error(`Failed to stop: ${err}`)
   }

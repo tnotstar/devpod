@@ -172,10 +172,10 @@ async function handleDelete(force = false) {
           <div>{status ?? machine.status ?? "Unknown"}</div>
 
           <div class="text-muted-foreground">Created</div>
-          <div>{machine.creationTimestamp ?? "N/A"}</div>
+          <div>{machine.creationTimestamp ? formatTimestamp(machine.creationTimestamp) : "N/A"}</div>
 
           <div class="text-muted-foreground">Last Used</div>
-          <div>{machine.lastUsedTimestamp ?? "N/A"}</div>
+          <div>{machine.lastUsedTimestamp ? formatTimestamp(machine.lastUsedTimestamp) : "N/A"}</div>
         </div>
       </Tabs.Content>
 

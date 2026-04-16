@@ -5,7 +5,7 @@ import { workspaces } from "$lib/stores/workspaces.js"
 import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import type { PaletteItem } from "$lib/stores/command-palette.js"
-import { LayoutDashboard, Box, Plug, Server } from "lucide-svelte"
+import { LayoutDashboard, Box, Plug, Server, KeyRound } from "lucide-svelte"
 let query = $state("")
 let selectedIndex = $state(0)
 let inputEl = $state<HTMLInputElement | null>(null)
@@ -15,6 +15,7 @@ const CATEGORY_ICONS: Record<string, any> = {
   Workspaces: Box,
   Providers: Plug,
   Machines: Server,
+  "SSH Keys": KeyRound,
 }
 
 // Build items list from navigation + dynamic resources
@@ -75,6 +76,13 @@ let allItems = $derived.by(() => {
       description: "Terminal sessions",
       category: "Navigation",
       href: "/terminals",
+    },
+    {
+      id: "nav-ssh-keys",
+      label: "SSH Keys",
+      description: "Manage SSH keys",
+      category: "Navigation",
+      href: "/ssh-keys",
     },
     {
       id: "nav-settings",

@@ -329,10 +329,10 @@ async function handleDelete() {
           <div>{workspace.status ?? "Unknown"}</div>
 
           <div class="text-muted-foreground">Created</div>
-          <div>{workspace.creationTimestamp ?? "N/A"}</div>
+          <div>{workspace.creationTimestamp ? formatTimestamp(workspace.creationTimestamp) : "N/A"}</div>
 
           <div class="text-muted-foreground">Last Used</div>
-          <div>{workspace.lastUsedTimestamp ?? "N/A"}</div>
+          <div>{workspace.lastUsedTimestamp ? formatTimestamp(workspace.lastUsedTimestamp) : "N/A"}</div>
 
           <div class="text-muted-foreground">Context</div>
           <div>{workspace.context ?? "N/A"}</div>

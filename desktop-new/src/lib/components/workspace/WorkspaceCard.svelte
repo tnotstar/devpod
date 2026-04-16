@@ -37,7 +37,7 @@ async function handleStart(e: Event) {
   acting = true
   try {
     await workspaceUp({ source: workspace.id })
-    toasts.success(`Starting ${workspace.id}`)
+    toasts.success(`Starting ${workspace.id}...`)
   } catch (err) {
     toasts.error(`Failed to start: ${err}`)
   } finally {
@@ -50,7 +50,7 @@ async function handleStop(e: Event) {
   acting = true
   try {
     await workspaceStop(workspace.id)
-    toasts.success(`Stopped ${workspace.id}`)
+    toasts.success(`Stopping ${workspace.id}...`)
   } catch (err) {
     toasts.error(`Failed to stop: ${err}`)
   } finally {

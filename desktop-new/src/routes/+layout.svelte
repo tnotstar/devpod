@@ -24,7 +24,9 @@ const NAV_KEYS: Record<string, string> = {
   "2": "/workspaces",
   "3": "/providers",
   "4": "/machines",
-  "5": "/settings",
+  "5": "/terminals",
+  "6": "/ssh-keys",
+  "7": "/settings",
 }
 
 function handleKeydown(e: KeyboardEvent) {
