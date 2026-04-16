@@ -3,13 +3,21 @@ import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
-import { machineStop, machineDelete } from "$lib/ipc/commands.js"
+import { machineStart, machineStop, machineDelete } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { Machine } from "$lib/types/index.js"
 
 let { machine }: { machine: Machine } = $props()
 let confirmDeleteOpen = $state(false)
 let deleting = $state(false)
+let acting = $state(false)
+
+let isRunning = $derived(machine.status?.toLowerCase() === "running")
+let isStopped = $derived(
+  !machine.status ||
+    machine.status.toLowerCase() === "stopped" ||
+    machine.status.toLowerCase() === "notfound",
+)
 
 function timeAgo(timestamp?: string): string {
   if (!timestamp) return "Unknown"
@@ -23,13 +31,29 @@ function timeAgo(timestamp?: string): string {
   return `${days}d ago`
 }
 
+async function handleStart(e: Event) {
+  e.stopPropagation()
+  acting = true
+  try {
+    await machineStart(machine.id)
+    toasts.success(`Started ${machine.id}`)
+  } catch (err) {
+    toasts.error(`Failed to start: ${err}`)
+  } finally {
+    acting = false
+  }
+}
+
 async function handleStop(e: Event) {
   e.stopPropagation()
+  acting = true
   try {
     await machineStop(machine.id)
     toasts.success(`Stopped ${machine.id}`)
   } catch (err) {
     toasts.error(`Failed to stop: ${err}`)
+  } finally {
+    acting = false
   }
 }
 
@@ -60,7 +84,7 @@ async function handleDelete() {
   <div class="flex items-start justify-between gap-2">
     <h3 class="font-semibold truncate">{machine.id}</h3>
     {#if machine.status}
-      <span class={badgeVariants({ variant: "default" })}>{machine.status}</span>
+      <span class={badgeVariants({ variant: isRunning ? "default" : "outline" })}>{machine.status}</span>
     {/if}
   </div>
 
@@ -74,8 +98,17 @@ async function handleDelete() {
   </div>
 
   <div class="mt-3 flex gap-2">
-    <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
-    <Button variant="destructive" size="sm" onclick={openDeleteConfirm}>Delete</Button>
+    {#if isStopped}
+      <Button size="sm" onclick={handleStart} disabled={acting}>
+        {acting ? "Starting..." : "Start"}
+      </Button>
+    {/if}
+    {#if isRunning}
+      <Button variant="outline" size="sm" onclick={handleStop} disabled={acting}>
+        {acting ? "Stopping..." : "Stop"}
+      </Button>
+    {/if}
+    <Button variant="destructive" size="sm" onclick={openDeleteConfirm} disabled={acting}>Delete</Button>
   </div>
 </button>
 
