@@ -19,7 +19,7 @@ import {
 import { toasts } from "$lib/stores/toasts.js"
 import type { ProviderOption } from "$lib/types/index.js"
 
-let id = $derived($page.params.id)
+let id = $derived($page.params.id as string)
 let provider = $derived($providers.find((p) => p.name === id))
 
 let options = $state<Record<string, ProviderOption>>({})

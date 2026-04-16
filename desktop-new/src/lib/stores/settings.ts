@@ -50,7 +50,7 @@ export function initSettings() {
   if (browser) {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
     const handler = () => {
-      let current: Theme = "dark"
+      let current = "dark" as Theme
       theme.subscribe((v) => (current = v))()
       if (current === "system") {
         applyTheme("system")

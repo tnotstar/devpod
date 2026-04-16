@@ -22,7 +22,7 @@ import { toasts } from "$lib/stores/toasts.js"
 import type { AuditEntry, LogEntry } from "$lib/types/index.js"
 import type { UnlistenFn } from "@tauri-apps/api/event"
 
-let id = $derived($page.params.id)
+let id = $derived($page.params.id as string)
 let workspace = $derived($workspaces.find((ws) => ws.id === id))
 
 let outputLines = $state<string[]>([])

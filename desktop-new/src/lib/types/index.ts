@@ -57,6 +57,7 @@ export interface ProviderOption {
   displayName?: string
   description?: string
   default?: OptionValue
+  value?: OptionValue
   enum?: string[]
   required?: boolean
   hidden?: boolean

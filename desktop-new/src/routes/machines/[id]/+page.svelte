@@ -19,7 +19,7 @@ import {
 import { toasts } from "$lib/stores/toasts.js"
 import type { AuditEntry } from "$lib/types/index.js"
 
-let id = $derived($page.params.id)
+let id = $derived($page.params.id as string)
 let machine = $derived($machines.find((m) => m.id === id))
 
 let status = $state<string | null>(null)
