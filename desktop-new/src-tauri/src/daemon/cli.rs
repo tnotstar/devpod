@@ -36,10 +36,6 @@ impl CliRunner {
         Ok(Self { binary_path })
     }
 
-    pub fn binary_path(&self) -> &PathBuf {
-        &self.binary_path
-    }
-
     pub async fn run<T: DeserializeOwned>(&self, args: &[&str]) -> Result<T, CliError> {
         let mut cmd_args: Vec<&str> = args.to_vec();
         cmd_args.push("--output");

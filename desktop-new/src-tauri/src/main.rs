@@ -19,7 +19,7 @@ use daemon::watcher::{start_fs_watcher, Watcher};
 use log::{error, info};
 use persistence::audit::AuditLog;
 use persistence::logs::LogStore;
-use tauri::Manager;
+use tauri::{Manager, RunEvent, WindowEvent};
 use terminal::pty::PtyManager;
 use tokio::sync::RwLock;
 
@@ -151,6 +151,22 @@ fn main() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let RunEvent::WindowEvent {
+                label,
+                event: WindowEvent::CloseRequested { api, .. },
+                ..
+            } = event
+            {
+                // Hide the window instead of quitting when user closes it
+                if label == "main" {
+                    api.prevent_close();
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.hide();
+                    }
+                }
+            }
+        });
 }
