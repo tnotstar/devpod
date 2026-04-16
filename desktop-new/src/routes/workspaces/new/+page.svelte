@@ -167,7 +167,23 @@ async function handleSubmit() {
 
   {#if outputLines.length > 0}
     <div class="space-y-2">
-      <h2 class="text-sm font-medium">Output</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-medium">Output</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={async () => {
+            try {
+              await navigator.clipboard.writeText(outputLines.join("\n"))
+              toasts.success("Copied to clipboard")
+            } catch {
+              toasts.error("Failed to copy")
+            }
+          }}
+        >
+          Copy
+        </Button>
+      </div>
       <ScrollArea class="h-64 rounded-md border bg-muted/50 p-4">
         <pre class="text-xs font-mono whitespace-pre-wrap">{outputLines.join("\n")}</pre>
       </ScrollArea>

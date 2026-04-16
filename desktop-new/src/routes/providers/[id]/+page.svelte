@@ -24,10 +24,18 @@ let provider = $derived($providers.find((p) => p.name === id))
 
 let options = $state<Record<string, ProviderOption>>({})
 let optionValues = $state<Record<string, string>>({})
+let initialValues = $state<Record<string, string>>({})
 let saving = $state(false)
 let loading = $state(true)
 let confirmDeleteOpen = $state(false)
 let deleting = $state(false)
+
+let isDirty = $derived.by(() => {
+  for (const key of Object.keys(optionValues)) {
+    if (optionValues[key] !== (initialValues[key] ?? "")) return true
+  }
+  return false
+})
 
 // Group options by their group field, with ungrouped options first
 let groupedOptions = $derived.by(() => {
@@ -58,6 +66,7 @@ onMount(async () => {
         optionValues[key] = ""
       }
     }
+    initialValues = { ...optionValues }
   } catch {
     // Options not available
   } finally {
@@ -105,6 +114,7 @@ async function handleSaveOptions() {
       if (val !== "") values[key] = val
     }
     await providerSetOptions(id, values)
+    initialValues = { ...optionValues }
     toasts.success("Options saved")
   } catch (err) {
     toasts.error(`Failed to save options: ${err}`)
@@ -194,9 +204,17 @@ async function handleSaveOptions() {
           </div>
         {/each}
 
-        <Button onclick={handleSaveOptions} disabled={saving}>
-          {saving ? "Saving..." : "Save Options"}
-        </Button>
+        <div class="flex items-center gap-3">
+          <Button onclick={handleSaveOptions} disabled={saving || !isDirty}>
+            {saving ? "Saving..." : "Save Options"}
+          </Button>
+          {#if isDirty}
+            <Button variant="outline" onclick={() => { optionValues = { ...initialValues } }}>
+              Reset
+            </Button>
+            <span class="text-xs text-muted-foreground">Unsaved changes</span>
+          {/if}
+        </div>
       {/if}
     </div>
   {/if}
