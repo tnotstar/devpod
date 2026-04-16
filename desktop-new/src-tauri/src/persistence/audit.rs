@@ -71,7 +71,7 @@ impl AuditLog {
         details: &str,
         success: bool,
     ) -> Result<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().map_err(|e| anyhow::anyhow!("Audit mutex poisoned: {}", e))?;
         let timestamp = Utc::now().to_rfc3339();
 
         conn.execute(
@@ -84,7 +84,7 @@ impl AuditLog {
 
     /// Get the most recent audit entries, up to `limit`.
     pub fn recent(&self, limit: u32) -> Result<Vec<AuditEntry>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().map_err(|e| anyhow::anyhow!("Audit mutex poisoned: {}", e))?;
         let mut stmt = conn.prepare(
             "SELECT id, timestamp, action, resource_type, resource_id, details, success
              FROM audit_log
@@ -116,7 +116,7 @@ impl AuditLog {
         resource_id: &str,
         limit: u32,
     ) -> Result<Vec<AuditEntry>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().map_err(|e| anyhow::anyhow!("Audit mutex poisoned: {}", e))?;
         let mut stmt = conn.prepare(
             "SELECT id, timestamp, action, resource_type, resource_id, details, success
              FROM audit_log
@@ -144,7 +144,7 @@ impl AuditLog {
 
     /// Prune entries older than `max_age_days`.
     pub fn prune(&self, max_age_days: i64) -> Result<u64> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().map_err(|e| anyhow::anyhow!("Audit mutex poisoned: {}", e))?;
         let cutoff = Utc::now() - chrono::Duration::days(max_age_days);
         let cutoff_str = cutoff.to_rfc3339();
 

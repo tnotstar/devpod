@@ -14,12 +14,10 @@ import {
   Server,
   Droplets,
 } from "lucide-svelte"
-import type { Component } from "svelte"
-
 const POPULAR_PROVIDERS: {
   name: string
   description: string
-  icon: Component<{ class?: string }>
+  icon: any
 }[] = [
   { name: "docker", description: "Local Docker containers", icon: Container },
   { name: "ssh", description: "Remote SSH machines", icon: Terminal },

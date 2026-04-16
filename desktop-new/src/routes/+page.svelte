@@ -13,7 +13,6 @@ import { auditRecent, workspaceStop } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import { Box, Plug, Server } from "lucide-svelte"
 import type { AuditEntry } from "$lib/types/index.js"
-import type { Component } from "svelte"
 import { formatTimestamp } from "$lib/utils/time.js"
 
 let activity = $state<AuditEntry[]>([])
@@ -38,7 +37,7 @@ const stats = $derived([
     label: "Workspaces",
     count: $workspaces.length,
     href: "/workspaces",
-    icon: Box as Component<{ class?: string }>,
+    icon: Box,
     sub:
       runningWorkspaces.length > 0
         ? `${runningWorkspaces.length} running`
@@ -48,14 +47,14 @@ const stats = $derived([
     label: "Providers",
     count: $providers.length,
     href: "/providers",
-    icon: Plug as Component<{ class?: string }>,
+    icon: Plug,
     sub: undefined as string | undefined,
   },
   {
     label: "Machines",
     count: $machines.length,
     href: "/machines",
-    icon: Server as Component<{ class?: string }>,
+    icon: Server,
     sub:
       runningMachines.length > 0
         ? `${runningMachines.length} running`

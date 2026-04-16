@@ -1,8 +1,6 @@
 <script lang="ts">
 import { page } from "$app/stores"
 import { cn } from "$lib/utils.js"
-import type { Component } from "svelte"
-
 let {
   href,
   label,
@@ -12,7 +10,7 @@ let {
   href: string
   label: string
   badgeCount?: number
-  icon?: Component<{ class?: string }>
+  icon?: any
 } = $props()
 
 let isActive = $derived(

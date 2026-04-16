@@ -8,7 +8,6 @@ pub mod event_names {
     pub const MACHINES_CHANGED: &str = "machines-changed";
     pub const CONTEXTS_CHANGED: &str = "contexts-changed";
     pub const COMMAND_PROGRESS: &str = "command-progress";
-    pub const DAEMON_STATUS: &str = "daemon-status";
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,11 +36,4 @@ pub struct CommandProgressPayload {
     pub command_id: String,
     pub message: String,
     pub done: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum DaemonStatusPayload {
-    Starting,
-    Running,
-    Error(String),
 }

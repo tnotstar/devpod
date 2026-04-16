@@ -20,8 +20,15 @@ pub async fn provider_add(
     cli: State<'_, Arc<CliRunner>>,
     audit: State<'_, Arc<AuditLog>>,
     name: String,
+    source: Option<String>,
 ) -> Result<(), String> {
-    let result = cli.run_raw(&["provider", "add", &name]).await;
+    let src = source.as_deref().unwrap_or(&name);
+    let mut args = vec!["provider", "add", src];
+    if source.is_some() {
+        args.push("--name");
+        args.push(&name);
+    }
+    let result = cli.run_raw(&args).await;
     let success = result.is_ok();
     if let Err(e) = audit.record("add", "provider", &name, "", success) {
         error!("Failed to record audit entry: {}", e);

@@ -21,12 +21,27 @@ pub async fn machine_create(
     audit: State<'_, Arc<AuditLog>>,
     name: String,
     provider: String,
+    options: Option<std::collections::HashMap<String, String>>,
 ) -> Result<(), String> {
-    let result = cli
-        .run_raw(&["machine", "create", &name, "--provider", &provider])
-        .await;
+    let mut args = vec!["machine", "create", &name, "--provider", &provider];
+    let option_args: Vec<String> = options
+        .unwrap_or_default()
+        .into_iter()
+        .map(|(k, v)| format!("{}={}", k, v))
+        .collect();
+    for opt in &option_args {
+        args.push("--option");
+        args.push(opt);
+    }
+    let result = cli.run_raw(&args).await;
     let success = result.is_ok();
-    if let Err(e) = audit.record("create", "machine", &name, &format!("provider={}", provider), success) {
+    if let Err(e) = audit.record(
+        "create",
+        "machine",
+        &name,
+        &format!("provider={}", provider),
+        success,
+    ) {
         error!("Failed to record audit entry: {}", e);
     }
     result.map_err(|e| e.to_string())?;
@@ -37,11 +52,17 @@ pub async fn machine_create(
 pub async fn machine_delete(
     cli: State<'_, Arc<CliRunner>>,
     audit: State<'_, Arc<AuditLog>>,
-    name: String,
+    id: String,
+    force: Option<bool>,
 ) -> Result<(), String> {
-    let result = cli.run_raw(&["machine", "delete", &name]).await;
+    let mut args = vec!["machine", "delete", &id];
+    if force.unwrap_or(false) {
+        args.push("--force");
+    }
+    let result = cli.run_raw(&args).await;
     let success = result.is_ok();
-    if let Err(e) = audit.record("delete", "machine", &name, "", success) {
+    let details = if force.unwrap_or(false) { "force=true" } else { "" };
+    if let Err(e) = audit.record("delete", "machine", &id, details, success) {
         error!("Failed to record audit entry: {}", e);
     }
     result.map_err(|e| e.to_string())?;
@@ -52,11 +73,11 @@ pub async fn machine_delete(
 pub async fn machine_start(
     cli: State<'_, Arc<CliRunner>>,
     audit: State<'_, Arc<AuditLog>>,
-    name: String,
+    id: String,
 ) -> Result<(), String> {
-    let result = cli.run_raw(&["machine", "start", &name]).await;
+    let result = cli.run_raw(&["machine", "start", &id]).await;
     let success = result.is_ok();
-    if let Err(e) = audit.record("start", "machine", &name, "", success) {
+    if let Err(e) = audit.record("start", "machine", &id, "", success) {
         error!("Failed to record audit entry: {}", e);
     }
     result.map_err(|e| e.to_string())?;
@@ -67,11 +88,11 @@ pub async fn machine_start(
 pub async fn machine_stop(
     cli: State<'_, Arc<CliRunner>>,
     audit: State<'_, Arc<AuditLog>>,
-    name: String,
+    id: String,
 ) -> Result<(), String> {
-    let result = cli.run_raw(&["machine", "stop", &name]).await;
+    let result = cli.run_raw(&["machine", "stop", &id]).await;
     let success = result.is_ok();
-    if let Err(e) = audit.record("stop", "machine", &name, "", success) {
+    if let Err(e) = audit.record("stop", "machine", &id, "", success) {
         error!("Failed to record audit entry: {}", e);
     }
     result.map_err(|e| e.to_string())?;
@@ -81,9 +102,9 @@ pub async fn machine_stop(
 #[tauri::command]
 pub async fn machine_status(
     cli: State<'_, Arc<CliRunner>>,
-    name: String,
+    id: String,
 ) -> Result<String, String> {
-    cli.run_raw(&["machine", "status", &name, "--output", "json"])
+    cli.run_raw(&["machine", "status", &id, "--output", "json"])
         .await
         .map_err(|e| e.to_string())
 }

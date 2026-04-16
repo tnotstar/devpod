@@ -6,13 +6,11 @@ import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import type { PaletteItem } from "$lib/stores/command-palette.js"
 import { LayoutDashboard, Box, Plug, Server } from "lucide-svelte"
-import type { Component } from "svelte"
-
 let query = $state("")
 let selectedIndex = $state(0)
 let inputEl = $state<HTMLInputElement | null>(null)
 
-const CATEGORY_ICONS: Record<string, Component<{ class?: string }>> = {
+const CATEGORY_ICONS: Record<string, any> = {
   Navigation: LayoutDashboard,
   Workspaces: Box,
   Providers: Plug,
