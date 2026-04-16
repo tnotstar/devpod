@@ -26,9 +26,24 @@ let status = $state<string | null>(null)
 let polling = $state(false)
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
+let isRunning = $derived(
+  status?.toLowerCase() === "running" ||
+    machine?.status?.toLowerCase() === "running",
+)
+let isStopped = $derived.by(() => {
+  const s = (status ?? machine?.status ?? "").toLowerCase()
+  return !s || s === "stopped" || s === "notfound"
+})
+
+function statusBadgeVariant(): "default" | "secondary" | "outline" {
+  if (isRunning) return "default"
+  return "outline"
+}
+
 let auditEntries = $state<AuditEntry[]>([])
 let auditLoading = $state(false)
 let confirmDeleteOpen = $state(false)
+let confirmForceDeleteOpen = $state(false)
 let deleting = $state(false)
 
 onMount(async () => {
@@ -96,12 +111,13 @@ async function handleStop() {
   }
 }
 
-async function handleDelete() {
+async function handleDelete(force = false) {
   deleting = true
   try {
-    await machineDelete(id)
+    await machineDelete(id, force)
     toasts.success(`Deleted ${id}`)
     confirmDeleteOpen = false
+    confirmForceDeleteOpen = false
     goto("/machines")
   } catch (err) {
     toasts.error(`Failed to delete: ${err}`)
@@ -118,7 +134,7 @@ async function handleDelete() {
     </Button>
     <h1 class="text-2xl font-bold">{id}</h1>
     {#if status}
-      <span class={badgeVariants({ variant: "default" })}>{status}</span>
+      <span class={badgeVariants({ variant: statusBadgeVariant() })}>{status}</span>
     {/if}
     {#if polling}
       <span class="text-xs text-muted-foreground animate-pulse">updating...</span>
@@ -126,9 +142,18 @@ async function handleDelete() {
   </div>
 
   <div class="flex gap-2">
-    <Button variant="outline" size="sm" onclick={handleStart} disabled={polling}>Start</Button>
-    <Button variant="outline" size="sm" onclick={handleStop} disabled={polling}>Stop</Button>
-    <Button variant="destructive" size="sm" onclick={() => (confirmDeleteOpen = true)}>Delete</Button>
+    {#if isStopped}
+      <Button size="sm" onclick={handleStart} disabled={polling}>
+        {polling ? "Starting..." : "Start"}
+      </Button>
+    {/if}
+    {#if isRunning}
+      <Button variant="outline" size="sm" onclick={handleStop} disabled={polling}>
+        {polling ? "Stopping..." : "Stop"}
+      </Button>
+    {/if}
+    <Button variant="destructive" size="sm" onclick={() => (confirmDeleteOpen = true)} disabled={polling}>Delete</Button>
+    <Button variant="outline" size="sm" onclick={() => (confirmForceDeleteOpen = true)} disabled={polling}>Force Delete</Button>
   </div>
 
   <Separator />
@@ -206,5 +231,14 @@ async function handleDelete() {
   description="This will permanently delete machine '{id}'. This action cannot be undone."
   confirmLabel="Delete"
   loading={deleting}
-  onconfirm={handleDelete}
+  onconfirm={() => handleDelete(false)}
+/>
+
+<ConfirmDialog
+  bind:open={confirmForceDeleteOpen}
+  title="Force delete machine"
+  description="This will forcefully delete machine '{id}', skipping graceful shutdown. Use this only if the machine is stuck. This action cannot be undone."
+  confirmLabel="Force Delete"
+  loading={deleting}
+  onconfirm={() => handleDelete(true)}
 />
