@@ -7,6 +7,7 @@ import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import { Separator } from "$lib/components/ui/separator/index.js"
 import * as Tabs from "$lib/components/ui/tabs/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
+import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
 import { workspaces } from "$lib/stores/workspaces.js"
 import {
   workspaceStop,
@@ -34,6 +35,8 @@ let logsLoading = $state(false)
 
 let auditEntries = $state<AuditEntry[]>([])
 let auditLoading = $state(false)
+let confirmDeleteOpen = $state(false)
+let deleting = $state(false)
 
 onMount(async () => {
   try {
@@ -112,12 +115,16 @@ async function handleRebuild() {
 }
 
 async function handleDelete() {
+  deleting = true
   try {
     await workspaceDelete(id)
     toasts.success(`Deleted ${id}`)
+    confirmDeleteOpen = false
     goto("/workspaces")
   } catch (err) {
     toasts.error(`Failed to delete: ${err}`)
+  } finally {
+    deleting = false
   }
 }
 </script>
@@ -139,7 +146,7 @@ async function handleDelete() {
   <div class="flex gap-2">
     <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
     <Button variant="outline" size="sm" onclick={handleRebuild}>Rebuild</Button>
-    <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
+    <Button variant="destructive" size="sm" onclick={() => (confirmDeleteOpen = true)}>Delete</Button>
   </div>
 
   <Separator />
@@ -282,3 +289,12 @@ async function handleDelete() {
     </Tabs.Root>
   {/if}
 </div>
+
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title="Delete workspace"
+  description="This will permanently delete workspace '{id}' and all associated data. This action cannot be undone."
+  confirmLabel="Delete"
+  loading={deleting}
+  onconfirm={handleDelete}
+/>

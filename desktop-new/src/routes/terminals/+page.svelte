@@ -44,7 +44,7 @@ function handleExit() {
 <div class="flex h-full flex-col">
   <div class="flex items-center justify-between border-b px-4 py-2">
     <h1 class="text-lg font-semibold">Terminals</h1>
-    <Button size="sm" on:click={createShell}>New Shell</Button>
+    <Button size="sm" onclick={createShell}>New Shell</Button>
   </div>
 
   {#if $terminals.length > 0}
@@ -90,7 +90,7 @@ function handleExit() {
     <div class="flex flex-1 items-center justify-center">
       <div class="text-center text-muted-foreground">
         <p class="mb-2 text-lg">No active terminals</p>
-        <Button size="sm" on:click={createShell}>Create a shell</Button>
+        <Button size="sm" onclick={createShell}>Create a shell</Button>
       </div>
     </div>
   {/if}

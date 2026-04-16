@@ -7,6 +7,7 @@ import { Separator } from "$lib/components/ui/separator/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import * as Tabs from "$lib/components/ui/tabs/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
+import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
 import { machines } from "$lib/stores/machines.js"
 import {
   machineStart,
@@ -27,6 +28,8 @@ let pollTimer: ReturnType<typeof setInterval> | null = null
 
 let auditEntries = $state<AuditEntry[]>([])
 let auditLoading = $state(false)
+let confirmDeleteOpen = $state(false)
+let deleting = $state(false)
 
 onMount(async () => {
   await refreshStatus()
@@ -94,12 +97,16 @@ async function handleStop() {
 }
 
 async function handleDelete() {
+  deleting = true
   try {
     await machineDelete(id)
     toasts.success(`Deleted ${id}`)
+    confirmDeleteOpen = false
     goto("/machines")
   } catch (err) {
     toasts.error(`Failed to delete: ${err}`)
+  } finally {
+    deleting = false
   }
 }
 </script>
@@ -121,7 +128,7 @@ async function handleDelete() {
   <div class="flex gap-2">
     <Button variant="outline" size="sm" onclick={handleStart} disabled={polling}>Start</Button>
     <Button variant="outline" size="sm" onclick={handleStop} disabled={polling}>Stop</Button>
-    <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
+    <Button variant="destructive" size="sm" onclick={() => (confirmDeleteOpen = true)}>Delete</Button>
   </div>
 
   <Separator />
@@ -192,3 +199,12 @@ async function handleDelete() {
     </Tabs.Root>
   {/if}
 </div>
+
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title="Delete machine"
+  description="This will permanently delete machine '{id}'. This action cannot be undone."
+  confirmLabel="Delete"
+  loading={deleting}
+  onconfirm={handleDelete}
+/>

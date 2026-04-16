@@ -2,11 +2,14 @@
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
+import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
 import { machineStop, machineDelete } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { Machine } from "$lib/types/index.js"
 
 let { machine }: { machine: Machine } = $props()
+let confirmDeleteOpen = $state(false)
+let deleting = $state(false)
 
 function timeAgo(timestamp?: string): string {
   if (!timestamp) return "Unknown"
@@ -30,13 +33,21 @@ async function handleStop(e: Event) {
   }
 }
 
-async function handleDelete(e: Event) {
+function openDeleteConfirm(e: Event) {
   e.stopPropagation()
+  confirmDeleteOpen = true
+}
+
+async function handleDelete() {
+  deleting = true
   try {
     await machineDelete(machine.id)
     toasts.success(`Deleted ${machine.id}`)
+    confirmDeleteOpen = false
   } catch (err) {
     toasts.error(`Failed to delete: ${err}`)
+  } finally {
+    deleting = false
   }
 }
 </script>
@@ -64,6 +75,15 @@ async function handleDelete(e: Event) {
 
   <div class="mt-3 flex gap-2">
     <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
-    <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
+    <Button variant="destructive" size="sm" onclick={openDeleteConfirm}>Delete</Button>
   </div>
 </button>
+
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title="Delete machine"
+  description="This will permanently delete machine '{machine.id}'. This action cannot be undone."
+  confirmLabel="Delete"
+  loading={deleting}
+  onconfirm={handleDelete}
+/>

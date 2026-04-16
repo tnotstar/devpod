@@ -2,11 +2,14 @@
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
+import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
 import { workspaceStop, workspaceDelete } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { Workspace } from "$lib/types/index.js"
 
 let { workspace }: { workspace: Workspace } = $props()
+let confirmDeleteOpen = $state(false)
+let deleting = $state(false)
 
 function sourceDisplay(ws: Workspace): string {
   if (ws.source?.gitRepository) return ws.source.gitRepository
@@ -37,13 +40,21 @@ async function handleStop(e: Event) {
   }
 }
 
-async function handleDelete(e: Event) {
+function openDeleteConfirm(e: Event) {
   e.stopPropagation()
+  confirmDeleteOpen = true
+}
+
+async function handleDelete() {
+  deleting = true
   try {
     await workspaceDelete(workspace.id)
     toasts.success(`Deleted ${workspace.id}`)
+    confirmDeleteOpen = false
   } catch (err) {
     toasts.error(`Failed to delete: ${err}`)
+  } finally {
+    deleting = false
   }
 }
 </script>
@@ -84,6 +95,15 @@ async function handleDelete(e: Event) {
 
   <div class="mt-3 flex gap-2">
     <Button variant="outline" size="sm" onclick={handleStop}>Stop</Button>
-    <Button variant="destructive" size="sm" onclick={handleDelete}>Delete</Button>
+    <Button variant="destructive" size="sm" onclick={openDeleteConfirm}>Delete</Button>
   </div>
 </button>
+
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title="Delete workspace"
+  description="This will permanently delete workspace '{workspace.id}' and all associated data. This action cannot be undone."
+  confirmLabel="Delete"
+  loading={deleting}
+  onconfirm={handleDelete}
+/>
