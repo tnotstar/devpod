@@ -12,7 +12,11 @@ let {
   badgeCount?: number
 } = $props()
 
-let isActive = $derived($page.url.pathname.startsWith(href))
+let isActive = $derived(
+  href === "/"
+    ? $page.url.pathname === "/"
+    : $page.url.pathname.startsWith(href),
+)
 </script>
 
 <a

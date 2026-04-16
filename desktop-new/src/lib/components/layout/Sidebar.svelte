@@ -5,6 +5,7 @@ import { workspaces } from "$lib/stores/workspaces.js"
 import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import { contexts } from "$lib/stores/contexts.js"
+import { togglePalette } from "$lib/stores/command-palette.js"
 
 let { terminalCount = 0 }: { terminalCount?: number } = $props()
 </script>
@@ -17,6 +18,7 @@ let { terminalCount = 0 }: { terminalCount?: number } = $props()
   <Separator />
 
   <nav class="flex flex-1 flex-col gap-1 p-3">
+    <SidebarItem href="/" label="Dashboard" />
     <SidebarItem href="/workspaces" label="Workspaces" badgeCount={$workspaces.length} />
     <SidebarItem href="/providers" label="Providers" badgeCount={$providers.length} />
     <SidebarItem href="/machines" label="Machines" badgeCount={$machines.length} />
@@ -27,5 +29,13 @@ let { terminalCount = 0 }: { terminalCount?: number } = $props()
 
     <Separator class="my-2" />
     <SidebarItem href="/settings" label="Settings" />
+
+    <button
+      class="mt-1 flex items-center justify-between rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-accent-foreground"
+      onclick={togglePalette}
+    >
+      <span>Search</span>
+      <kbd class="rounded border bg-muted px-1.5 py-0.5 text-xs font-mono">&#8984;K</kbd>
+    </button>
   </nav>
 </aside>
