@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Tooltip } from "bits-ui"
+import { Tooltip } from "bits-ui"
 import { cn } from "$lib/utils.js"
 import type { Snippet } from "svelte"
 

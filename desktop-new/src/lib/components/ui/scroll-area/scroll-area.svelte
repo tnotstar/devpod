@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ScrollArea } from "bits-ui"
+import { ScrollArea } from "bits-ui"
 import { cn } from "$lib/utils.js"
 import type { Snippet } from "svelte"
 
@@ -11,6 +11,7 @@ let {
   ...restProps
 }: ScrollArea.RootProps & {
   ref?: HTMLElement | null
+  orientation?: "vertical" | "horizontal"
   children?: Snippet
 } = $props()
 </script>

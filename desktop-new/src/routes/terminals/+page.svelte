@@ -71,7 +71,7 @@ function handleExit() {
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="flex h-full flex-col" onclick={closeSshMenu}>
+<div class="flex h-full flex-col" role="presentation" onclick={closeSshMenu}>
   <div class="flex items-center justify-between border-b px-4 py-2">
     <h1 class="text-lg font-semibold">Terminals</h1>
     <div class="flex gap-2">

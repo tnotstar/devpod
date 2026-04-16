@@ -211,6 +211,7 @@ $effect(() => {
       class="relative w-full max-w-lg rounded-lg border bg-card shadow-2xl"
       role="dialog"
       aria-label="Command palette"
+      tabindex="-1"
       onkeydown={handleKeydown}
     >
       <input
