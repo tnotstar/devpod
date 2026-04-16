@@ -2,7 +2,7 @@ use crate::SharedState;
 use log::error;
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, Manager};
+use tauri::{async_runtime, AppHandle, Manager};
 
 pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let show = MenuItemBuilder::with_id("show", "Show DevPod").build(app)?;
@@ -56,7 +56,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
 
     // Periodically rebuild the tray menu with workspace list
     let app_handle = app.clone();
-    tokio::spawn(async move {
+    async_runtime::spawn(async move {
         loop {
             tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             if let Err(e) = rebuild_tray_menu(&app_handle, &tray).await {

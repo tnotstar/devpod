@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use log::{error, info, warn};
 use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher as NotifyWatcher};
-use tauri::{AppHandle, Emitter, Runtime};
+use tauri::{async_runtime, AppHandle, Emitter, Runtime};
 use tokio::sync::RwLock;
 use tokio::time::sleep;
 
@@ -47,7 +47,7 @@ impl<R: Runtime> Watcher<R> {
     /// Start the polling loop in a background tokio task.
     pub fn start_polling(self: Arc<Self>) {
         let watcher = self.clone();
-        tokio::spawn(async move {
+        async_runtime::spawn(async move {
             loop {
                 watcher.poll_once().await;
                 sleep(watcher.interval).await;
@@ -222,7 +222,7 @@ pub fn start_fs_watcher<R: Runtime>(watcher: Arc<Watcher<R>>) {
                             if now.duration_since(last_event) >= debounce {
                                 last_event = now;
                                 let w = watcher.clone();
-                                tokio::spawn(async move {
+                                async_runtime::spawn(async move {
                                     w.poll_once().await;
                                 });
                             }
