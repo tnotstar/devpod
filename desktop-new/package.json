@@ -18,6 +18,7 @@
     "test:e2e:install": "cd e2e-tests && npm install"
   },
   "dependencies": {
+    "@lucide/svelte": "^1.8.0",
     "@sveltejs/adapter-static": "^3.0.0",
     "@sveltejs/kit": "^2.0.0",
     "@tauri-apps/api": "^2.10.1",
@@ -39,7 +40,6 @@
   },
   "devDependencies": {
     "@internationalized/date": "^3.12.1",
-    "@lucide/svelte": "^1.8.0",
     "@sveltejs/vite-plugin-svelte": "^5.1.1",
     "@tailwindcss/vite": "^4.2.2",
     "@tauri-apps/cli": "^2.10.1",
