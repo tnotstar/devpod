@@ -1,6 +1,6 @@
 <script lang="ts">
+import { ChevronRight } from "@lucide/svelte"
 import { page } from "$app/stores"
-import ChevronRight from "@lucide/svelte/icons/chevron-right"
 
 interface Crumb {
   label: string

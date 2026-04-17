@@ -1,4 +1,5 @@
 <script lang="ts">
+import { KeyRound, Copy, Plus, ShieldCheck, ShieldAlert } from "@lucide/svelte"
 import { onMount } from "svelte"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
@@ -10,11 +11,6 @@ import CardSkeleton from "$lib/components/ui/skeleton/CardSkeleton.svelte"
 import { sshKeyList, sshKeyGenerate } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { SshKeyInfo } from "$lib/types/index.js"
-import KeyRound from "@lucide/svelte/icons/key-round"
-import Copy from "@lucide/svelte/icons/copy"
-import Plus from "@lucide/svelte/icons/plus"
-import ShieldCheck from "@lucide/svelte/icons/shield-check"
-import ShieldAlert from "@lucide/svelte/icons/shield-alert"
 
 let keys = $state<SshKeyInfo[]>([])
 let loading = $state(true)

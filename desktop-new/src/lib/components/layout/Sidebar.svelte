@@ -1,4 +1,15 @@
 <script lang="ts">
+import {
+  LayoutDashboard,
+  Box,
+  Plug,
+  Server,
+  Layers,
+  SquareTerminal,
+  KeyRound,
+  Settings,
+  Search,
+} from "@lucide/svelte"
 import SidebarItem from "./SidebarItem.svelte"
 import { Separator } from "$lib/components/ui/separator/index.js"
 import { workspaces } from "$lib/stores/workspaces.js"
@@ -6,15 +17,6 @@ import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import { contexts } from "$lib/stores/contexts.js"
 import { togglePalette } from "$lib/stores/command-palette.js"
-import LayoutDashboard from "@lucide/svelte/icons/layout-dashboard"
-import Box from "@lucide/svelte/icons/box"
-import Plug from "@lucide/svelte/icons/plug"
-import Server from "@lucide/svelte/icons/server"
-import Layers from "@lucide/svelte/icons/layers"
-import SquareTerminal from "@lucide/svelte/icons/square-terminal"
-import KeyRound from "@lucide/svelte/icons/key-round"
-import Settings from "@lucide/svelte/icons/settings"
-import Search from "@lucide/svelte/icons/search"
 
 let { terminalCount = 0 }: { terminalCount?: number } = $props()
 </script>

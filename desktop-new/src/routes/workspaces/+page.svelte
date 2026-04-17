@@ -1,12 +1,11 @@
 <script lang="ts">
+import { Box, SearchX } from "@lucide/svelte"
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import CardSkeleton from "$lib/components/ui/skeleton/CardSkeleton.svelte"
 import WorkspaceCard from "$lib/components/workspace/WorkspaceCard.svelte"
 import { workspaces, workspacesLoading } from "$lib/stores/workspaces.js"
-import Box from "@lucide/svelte/icons/box"
-import SearchX from "@lucide/svelte/icons/search-x"
 
 let search = $state("")
 let sortBy = $state<"recent" | "name">("recent")

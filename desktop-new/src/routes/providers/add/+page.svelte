@@ -1,17 +1,19 @@
 <script lang="ts">
+import {
+  Container,
+  Terminal,
+  Ship,
+  Cloud,
+  Globe,
+  Server,
+  Droplets,
+} from "@lucide/svelte"
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import { Label } from "$lib/components/ui/label/index.js"
 import { providerAdd } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
-import Container from "@lucide/svelte/icons/container"
-import Terminal from "@lucide/svelte/icons/terminal"
-import Ship from "@lucide/svelte/icons/ship"
-import Cloud from "@lucide/svelte/icons/cloud"
-import Globe from "@lucide/svelte/icons/globe"
-import Server from "@lucide/svelte/icons/server"
-import Droplets from "@lucide/svelte/icons/droplets"
 const POPULAR_PROVIDERS: {
   name: string
   description: string

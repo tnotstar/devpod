@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Layers } from "@lucide/svelte"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import CardSkeleton from "$lib/components/ui/skeleton/CardSkeleton.svelte"
@@ -9,7 +10,6 @@ import {
 } from "$lib/stores/contexts.js"
 import { contextUse } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
-import Layers from "@lucide/svelte/icons/layers"
 
 async function handleUse(name: string) {
   try {

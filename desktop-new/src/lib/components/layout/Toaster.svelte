@@ -1,12 +1,9 @@
 <script lang="ts">
+import { CircleCheck, CircleX, Info, X } from "@lucide/svelte"
 import { toasts } from "$lib/stores/toasts.js"
 import type { Toast } from "$lib/stores/toasts.js"
 import { fly } from "svelte/transition"
 import { onDestroy } from "svelte"
-import CircleCheck from "@lucide/svelte/icons/circle-check"
-import CircleX from "@lucide/svelte/icons/circle-x"
-import Info from "@lucide/svelte/icons/info"
-import X from "@lucide/svelte/icons/x"
 
 // Track timers per toast so we can pause/resume on hover
 let timers = $state<

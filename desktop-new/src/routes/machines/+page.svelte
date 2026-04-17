@@ -1,10 +1,9 @@
 <script lang="ts">
+import { Server, SearchX } from "@lucide/svelte"
 import { Input } from "$lib/components/ui/input/index.js"
 import CardSkeleton from "$lib/components/ui/skeleton/CardSkeleton.svelte"
 import MachineCard from "$lib/components/machine/MachineCard.svelte"
 import { machines, machinesLoading } from "$lib/stores/machines.js"
-import Server from "@lucide/svelte/icons/server"
-import SearchX from "@lucide/svelte/icons/search-x"
 
 let search = $state("")
 let sortBy = $state<"name" | "created">("name")

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Box, Plug, Server } from "@lucide/svelte"
 import { onMount } from "svelte"
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
@@ -11,9 +12,6 @@ import { machines } from "$lib/stores/machines.js"
 import { activeContext } from "$lib/stores/contexts.js"
 import { auditRecent, workspaceStop } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
-import Box from "@lucide/svelte/icons/box"
-import Plug from "@lucide/svelte/icons/plug"
-import Server from "@lucide/svelte/icons/server"
 import type { AuditEntry } from "$lib/types/index.js"
 import { formatTimestamp } from "$lib/utils/time.js"
 

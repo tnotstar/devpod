@@ -1,8 +1,8 @@
 <script lang="ts">
+import { TriangleAlert } from "@lucide/svelte"
 import { page } from "$app/stores"
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
-import TriangleAlert from "@lucide/svelte/icons/triangle-alert"
 </script>
 
 <div class="flex h-full items-center justify-center">

@@ -1,9 +1,5 @@
 <script lang="ts">
-import Bell from "@lucide/svelte/icons/bell"
-import CircleCheck from "@lucide/svelte/icons/circle-check"
-import CircleX from "@lucide/svelte/icons/circle-x"
-import Info from "@lucide/svelte/icons/info"
-import Trash2 from "@lucide/svelte/icons/trash-2"
+import { Bell, CircleCheck, CircleX, Info, Trash2 } from "@lucide/svelte"
 import { Button } from "$lib/components/ui/button/index.js"
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"

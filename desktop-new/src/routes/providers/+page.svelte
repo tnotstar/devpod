@@ -1,12 +1,11 @@
 <script lang="ts">
+import { Plug, SearchX } from "@lucide/svelte"
 import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import CardSkeleton from "$lib/components/ui/skeleton/CardSkeleton.svelte"
 import ProviderCard from "$lib/components/provider/ProviderCard.svelte"
 import { providers, providersLoading } from "$lib/stores/providers.js"
-import Plug from "@lucide/svelte/icons/plug"
-import SearchX from "@lucide/svelte/icons/search-x"
 
 let search = $state("")
 let sortBy = $state<"name" | "version">("name")
