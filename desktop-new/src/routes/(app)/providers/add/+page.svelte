@@ -9,10 +9,12 @@ import {
   Droplets,
 } from "@lucide/svelte"
 import { goto } from "$app/navigation"
+import { get } from "svelte/store"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import { Label } from "$lib/components/ui/label/index.js"
 import { providerAdd } from "$lib/ipc/commands.js"
+import { providers } from "$lib/stores/providers.js"
 import { toasts } from "$lib/stores/toasts.js"
 const PROVIDERS: {
   name: string
@@ -36,11 +38,44 @@ let providerSource = $state("")
 let error = $state("")
 let submitting = $state(false)
 
-async function handleAdd(name: string, source?: string) {
-  error = ""
+let pendingSource = $state<string | null>(null)
+let pendingName = $state("")
+let customName = $state("")
+
+function nameExists(name: string): boolean {
+  return get(providers).some((p) => p.name === name)
+}
+
+function handlePresetClick(source: string) {
+  if (nameExists(source)) {
+    pendingSource = source
+    pendingName = ""
+  } else {
+    doAdd(source, source)
+  }
+}
+
+function handleConfirmName() {
+  const name = pendingName.trim()
+  if (!name) {
+    toasts.error("Name is required")
+    return
+  }
+  if (nameExists(name)) {
+    toasts.error(`Provider "${name}" already exists`)
+    return
+  }
+  if (pendingSource) {
+    doAdd(name, pendingSource)
+    pendingSource = null
+    pendingName = ""
+  }
+}
+
+async function doAdd(name: string, source?: string) {
   submitting = true
   try {
-    await providerAdd(name, source)
+    await providerAdd(name, source !== name ? source : undefined)
     toasts.success(`Added provider ${name}`)
     goto(`/providers?setup=${name}`)
   } catch (err) {
@@ -57,11 +92,17 @@ async function handleAdd(name: string, source?: string) {
 }
 
 async function handleSubmit() {
-  if (!providerSource.trim()) {
-    error = "Provider name or source is required"
+  const source = providerSource.trim()
+  if (!source) {
+    error = "Provider source is required"
     return
   }
-  await handleAdd(providerSource.trim())
+  const name = customName.trim() || source
+  if (nameExists(name)) {
+    toasts.error(`Provider "${name}" already exists`)
+    return
+  }
+  await doAdd(name, name !== source ? source : undefined)
 }
 </script>
 
@@ -75,11 +116,19 @@ async function handleSubmit() {
 
   <form class="space-y-4" onsubmit={(e) => { e.preventDefault(); handleSubmit() }}>
     <div class="space-y-2">
-      <Label>Provider Name or Source</Label>
+      <Label>Provider Source</Label>
       <Input
         placeholder="e.g. docker, or github.com/org/provider"
         value={providerSource}
         oninput={(e) => (providerSource = e.currentTarget.value)}
+      />
+    </div>
+    <div class="space-y-2">
+      <Label>Name <span class="text-muted-foreground font-normal">(optional)</span></Label>
+      <Input
+        placeholder="Defaults to source name"
+        value={customName}
+        oninput={(e) => (customName = e.currentTarget.value)}
       />
     </div>
 
@@ -87,6 +136,30 @@ async function handleSubmit() {
       {submitting ? "Adding..." : "Add Provider"}
     </Button>
   </form>
+
+  {#if pendingSource}
+    <div class="rounded-lg border bg-card p-4 space-y-3">
+      <h3 class="text-sm font-semibold">
+        Provider "{pendingSource}" already exists. Choose a different name:
+      </h3>
+      <form class="flex items-end gap-2" onsubmit={(e) => { e.preventDefault(); handleConfirmName() }}>
+        <div class="flex-1 space-y-1">
+          <Label>Provider Name</Label>
+          <Input
+            placeholder={`e.g. ${pendingSource}-2`}
+            value={pendingName}
+            oninput={(e) => (pendingName = e.currentTarget.value)}
+          />
+        </div>
+        <Button type="submit" size="sm" disabled={submitting || !pendingName.trim()}>
+          {submitting ? "Adding..." : "Add"}
+        </Button>
+        <Button variant="outline" size="sm" onclick={() => (pendingSource = null)}>
+          Cancel
+        </Button>
+      </form>
+    </div>
+  {/if}
 
   <div class="space-y-3">
     <h2 class="text-lg font-semibold">Providers</h2>
@@ -97,7 +170,7 @@ async function handleSubmit() {
           type="button"
           class="flex items-start gap-3 rounded-lg border bg-card p-4 text-left text-card-foreground shadow-sm transition-colors hover:bg-accent/50"
           disabled={submitting}
-          onclick={() => handleAdd(p.name)}
+          onclick={() => handlePresetClick(p.name)}
         >
           <Icon class="h-5 w-5 mt-0.5 shrink-0 text-muted-foreground" />
           <div>
