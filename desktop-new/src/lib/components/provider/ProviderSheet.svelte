@@ -14,6 +14,7 @@ import {
   providerDelete,
   providerOptions,
   providerSetOptions,
+  providerRename,
 } from "$lib/ipc/commands.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { Provider, ProviderOption } from "$lib/types/index.js"
@@ -38,6 +39,9 @@ let loading = $state(true)
 let confirmDeleteOpen = $state(false)
 let deleting = $state(false)
 let setupCompleted = $state(false)
+let renaming = $state(false)
+let renameValue = $state("")
+let renameSaving = $state(false)
 
 let isDirty = $derived.by(() => {
   for (const key of Object.keys(optionValues)) {
@@ -138,6 +142,30 @@ async function handleDelete() {
   }
 }
 
+function startRename() {
+  renameValue = provider.name
+  renaming = true
+}
+
+async function handleRename() {
+  const trimmed = renameValue.trim()
+  if (!trimmed || trimmed === provider.name) {
+    renaming = false
+    return
+  }
+  renameSaving = true
+  try {
+    await providerRename(provider.name, trimmed)
+    toasts.success(`Renamed provider to ${trimmed}`)
+    renaming = false
+    open = false
+  } catch (err) {
+    toasts.error(`Failed to rename: ${err}`)
+  } finally {
+    renameSaving = false
+  }
+}
+
 async function handleSaveOptions() {
   const missing = requiredOptions
     .filter(([key]) => !optionValues[key]?.trim())
@@ -183,7 +211,25 @@ async function handleSaveOptions() {
   <Sheet.ResizableContent>
     <Sheet.Header class="p-6">
       <Sheet.Title class="flex items-center gap-2">
-        {provider.name}
+        {#if renaming}
+          <form class="flex items-center gap-2" onsubmit={(e) => { e.preventDefault(); handleRename() }}>
+            <Input
+              value={renameValue}
+              oninput={(e) => (renameValue = e.currentTarget.value)}
+              class="h-7 w-48 text-sm"
+              disabled={renameSaving}
+            />
+            <Button variant="outline" size="sm" type="submit" disabled={renameSaving || !renameValue.trim()}>
+              {renameSaving ? "Saving..." : "Save"}
+            </Button>
+            <Button variant="ghost" size="sm" type="button" onclick={() => (renaming = false)} disabled={renameSaving}>
+              Cancel
+            </Button>
+          </form>
+        {:else}
+          {provider.name}
+          <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" onclick={startRename}>Rename</Button>
+        {/if}
         {#if provider.version}
           <span class={badgeVariants({ variant: "outline" })}>{provider.version}</span>
         {/if}

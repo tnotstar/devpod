@@ -112,3 +112,22 @@ pub async fn provider_set_options(
     result.map_err(|e| e.to_string())?;
     Ok(())
 }
+
+#[tauri::command]
+pub async fn provider_rename(
+    cli: State<'_, Arc<CliRunner>>,
+    audit: State<'_, Arc<AuditLog>>,
+    name: String,
+    new_name: String,
+) -> Result<(), String> {
+    let result = cli
+        .run_raw(&["provider", "rename", &name, &new_name])
+        .await;
+    let success = result.is_ok();
+    let details = format!("renamed to {}", new_name);
+    if let Err(e) = audit.record("rename", "provider", &name, &details, success) {
+        error!("Failed to record audit entry: {}", e);
+    }
+    result.map_err(|e| e.to_string())?;
+    Ok(())
+}

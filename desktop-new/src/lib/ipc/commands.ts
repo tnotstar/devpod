@@ -85,6 +85,13 @@ export async function providerSetOptions(
   return invoke("provider_set_options", { name, options: optionArgs })
 }
 
+export async function providerRename(
+  name: string,
+  newName: string,
+): Promise<void> {
+  return invoke("provider_rename", { name, newName })
+}
+
 // Machine commands
 export async function machineList(): Promise<Machine[]> {
   return invoke<Machine[]>("machine_list")

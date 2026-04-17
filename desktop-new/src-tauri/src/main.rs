@@ -54,6 +54,7 @@ fn main() {
             commands::providers::provider_update,
             commands::providers::provider_options,
             commands::providers::provider_set_options,
+            commands::providers::provider_rename,
             commands::machines::machine_list,
             commands::machines::machine_create,
             commands::machines::machine_delete,
