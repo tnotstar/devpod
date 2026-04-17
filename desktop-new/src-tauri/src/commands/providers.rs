@@ -23,7 +23,7 @@ pub async fn provider_add(
     source: Option<String>,
 ) -> Result<(), String> {
     let src = source.as_deref().unwrap_or(&name);
-    let mut args = vec!["provider", "add", src];
+    let mut args = vec!["provider", "add", src, "--use=false"];
     if source.is_some() {
         args.push("--name");
         args.push(&name);

@@ -47,10 +47,10 @@ async function handleAdd(name: string, source?: string) {
     const msg = err instanceof Error ? err.message : String(err)
     if (msg.includes("already exists")) {
       toasts.info(`Provider ${name} is already installed`)
-      goto("/providers")
+      goto(`/providers?setup=${name}`)
       return
     }
-    error = msg
+    toasts.error(`Failed to add provider: ${msg}`)
   } finally {
     submitting = false
   }
@@ -72,12 +72,6 @@ async function handleSubmit() {
     </Button>
     <h1 class="text-2xl font-bold">Add Provider</h1>
   </div>
-
-  {#if error}
-    <div class="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-      {error}
-    </div>
-  {/if}
 
   <form class="space-y-4" onsubmit={(e) => { e.preventDefault(); handleSubmit() }}>
     <div class="space-y-2">

@@ -91,8 +91,8 @@ async function loadOptions() {
       }
     }
     initialValues = { ...optionValues }
-  } catch {
-    // Options not available
+  } catch (err) {
+    toasts.error(`Failed to load options: ${err}`)
   } finally {
     loading = false
   }
@@ -147,6 +147,7 @@ async function handleSaveOptions() {
     await providerSetOptions(provider.name, values)
     initialValues = { ...optionValues }
     if (setup) {
+      await providerUse(provider.name)
       toasts.success(`Provider ${provider.name} configured successfully`)
       open = false
     } else {
