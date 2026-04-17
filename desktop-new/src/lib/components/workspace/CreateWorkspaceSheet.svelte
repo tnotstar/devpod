@@ -175,6 +175,7 @@ let createdId = $state<string | null>(null)
 let commandId = $state<string | null>(null)
 let outputLines = $state<string[]>([])
 let outputEl = $state<HTMLDivElement | null>(null)
+let openBtnEl = $state<HTMLButtonElement | null>(null)
 let unlisten: UnlistenFn | null = null
 
 onDestroy(() => {
@@ -222,6 +223,9 @@ async function handleSubmit() {
           if (stripAnsi(progress.message).includes("Exit code: 0")) {
             createdId = workspaceId ?? null
             toasts.success(`Workspace ${workspaceId ?? "created"} is ready`)
+            requestAnimationFrame(() => {
+              openBtnEl?.scrollIntoView({ block: "center", behavior: "smooth" })
+            })
           } else {
             toasts.error("Workspace creation failed. Check output for details.")
           }
@@ -399,9 +403,11 @@ async function handleSubmit() {
       {/if}
 
       {#if createdId}
-        <Button class="w-full" onclick={() => { open = false; goto(`/workspaces/${createdId}`) }}>
-          Open Workspace
-        </Button>
+        <div class="pb-8">
+          <Button class="w-full" bind:ref={openBtnEl} onclick={() => { open = false; goto(`/workspaces/${createdId}`) }}>
+            Open Workspace
+          </Button>
+        </div>
       {/if}
     </div>
   </Sheet.ResizableContent>
