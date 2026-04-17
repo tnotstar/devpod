@@ -191,6 +191,13 @@ export async function workspaceLogRead(
   return invoke<string>("workspace_log_read", { workspaceId, filename })
 }
 
+export async function workspaceLogDelete(
+  workspaceId: string,
+  filename: string,
+): Promise<void> {
+  return invoke<void>("workspace_log_delete", { workspaceId, filename })
+}
+
 // SSH key commands
 export async function sshKeyList(): Promise<SshKeyInfo[]> {
   return invoke<SshKeyInfo[]>("ssh_key_list")

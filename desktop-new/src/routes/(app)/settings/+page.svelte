@@ -55,7 +55,7 @@ function setTheme(value: Theme) {
 // ── Color Scheme ────────────────────────────────────────────────────
 
 const COLOR_SCHEMES: { value: ColorScheme; label: string; swatch: string }[] = [
-  { value: "default", label: "Default", swatch: "bg-foreground" },
+  { value: "default", label: "White", swatch: "bg-foreground" },
   { value: "emerald", label: "Emerald", swatch: "bg-emerald-600" },
   { value: "purple", label: "Purple", swatch: "bg-purple-600" },
 ]
@@ -211,15 +211,15 @@ function toggleLocal(key: keyof LocalOptions) {
 <div class="mx-auto max-w-2xl space-y-6">
   <h1 class="text-2xl font-bold">Settings</h1>
 
-  <Tabs.Root bind:value={activeTab}>
-    <Tabs.List variant="line" class="flex-wrap">
+  <Tabs.Root bind:value={activeTab} class="w-full">
+    <Tabs.List variant="line" class="w-full flex-wrap">
       <Tabs.Trigger value="general">General</Tabs.Trigger>
       <Tabs.Trigger value="appearance">Appearance</Tabs.Trigger>
       <Tabs.Trigger value="experimental">Experimental</Tabs.Trigger>
     </Tabs.List>
 
     <!-- ═══ GENERAL ═══ -->
-    <Tabs.Content value="general">
+    <Tabs.Content value="general" class="w-full">
       <div class="mt-4 space-y-6">
         <div class="space-y-2">
           <h2 class="text-lg font-semibold">Default IDE</h2>
@@ -227,8 +227,8 @@ function toggleLocal(key: keyof LocalOptions) {
           <Popover.Root bind:open={ideComboOpen}>
             <Popover.Trigger class="w-full">
               {#snippet child({ props })}
-                <Button variant="outline" class="w-full justify-between" {...props}>
-                  {IDE_OPTIONS.find((i) => i.value === $defaultIde)?.label ?? "Select IDE..."}
+                <Button variant="outline" class="w-full justify-between text-left" {...props}>
+                  <span class="truncate">{IDE_OPTIONS.find((i) => i.value === $defaultIde)?.label ?? "Select IDE..."}</span>
                   <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               {/snippet}
@@ -395,7 +395,7 @@ function toggleLocal(key: keyof LocalOptions) {
     </Tabs.Content>
 
     <!-- ═══ APPEARANCE ═══ -->
-    <Tabs.Content value="appearance">
+    <Tabs.Content value="appearance" class="w-full">
       <div class="mt-4 space-y-6">
         <div class="space-y-2">
           <h2 class="text-lg font-semibold">Theme</h2>
@@ -450,7 +450,7 @@ function toggleLocal(key: keyof LocalOptions) {
     </Tabs.Content>
 
     <!-- ═══ EXPERIMENTAL ═══ -->
-    <Tabs.Content value="experimental">
+    <Tabs.Content value="experimental" class="w-full">
       <div class="mt-4 space-y-6">
         <div class="rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3">
           <p class="text-sm text-yellow-600 dark:text-yellow-400">

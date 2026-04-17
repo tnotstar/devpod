@@ -1,3 +1,4 @@
+import ResizableContent from "./resizable-sheet-content.svelte"
 import Root from "./sheet.svelte"
 import Close from "./sheet-close.svelte"
 import Content from "./sheet-content.svelte"
@@ -24,6 +25,8 @@ export {
   Overlay as SheetOverlay,
   Portal,
   Portal as SheetPortal,
+  ResizableContent,
+  ResizableContent as SheetResizableContent,
   Root,
   //
   Root as Sheet,

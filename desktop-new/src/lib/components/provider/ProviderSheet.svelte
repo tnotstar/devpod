@@ -161,12 +161,15 @@ async function handleSaveOptions() {
 </script>
 
 <Sheet.Root bind:open>
-  <Sheet.Content side="right" class="sm:max-w-xl w-full">
-    <Sheet.Header>
+  <Sheet.ResizableContent>
+    <Sheet.Header class="p-6">
       <Sheet.Title class="flex items-center gap-2">
         {provider.name}
         {#if provider.version}
           <span class={badgeVariants({ variant: "outline" })}>{provider.version}</span>
+        {/if}
+        {#if provider.isDefault}
+          <span class={badgeVariants({ variant: "default" })}>default</span>
         {/if}
         {#if provider.state?.initialized}
           <span class={badgeVariants({ variant: "secondary" })}>initialized</span>
@@ -177,7 +180,7 @@ async function handleSaveOptions() {
       {/if}
     </Sheet.Header>
 
-    <div class="flex gap-2">
+    <div class="flex gap-2 px-6">
       <Button variant="outline" size="sm" onclick={handleSetDefault}>Set Default</Button>
       <Button variant="outline" size="sm" onclick={handleUpdate}>Update</Button>
       <Button variant="destructive" size="sm" onclick={() => (confirmDeleteOpen = true)}>Delete</Button>
@@ -185,7 +188,7 @@ async function handleSaveOptions() {
 
     <Separator />
 
-    <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+    <div class="flex-1 overflow-y-auto space-y-4 px-6">
       {#if setup && !loading && hasUnfilledRequired}
         <div class="rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
           <h3 class="text-sm font-semibold text-amber-700 dark:text-amber-400">Configure required options</h3>
@@ -248,7 +251,7 @@ async function handleSaveOptions() {
       {/if}
     </div>
 
-    <Sheet.Footer>
+    <Sheet.Footer class="p-6">
       <div class="flex items-center gap-2">
         <Button onclick={handleSaveOptions} disabled={saving || !isDirty} size="sm">
           {saving ? "Saving..." : setup ? "Save & Finish" : "Save Options"}
@@ -261,7 +264,7 @@ async function handleSaveOptions() {
         {/if}
       </div>
     </Sheet.Footer>
-  </Sheet.Content>
+  </Sheet.ResizableContent>
 </Sheet.Root>
 
 <ConfirmDialog

@@ -90,8 +90,8 @@ function toggleOption(key: keyof ContextOptions) {
 </script>
 
 <Sheet.Root bind:open>
-  <Sheet.Content side="right" class="sm:max-w-xl w-full">
-    <Sheet.Header>
+  <Sheet.ResizableContent>
+    <Sheet.Header class="p-6">
       <Sheet.Title class="flex items-center gap-2">
         {context.name}
         {#if isActive}
@@ -101,7 +101,7 @@ function toggleOption(key: keyof ContextOptions) {
       <Sheet.Description>Configure context options for {context.name}</Sheet.Description>
     </Sheet.Header>
 
-    <div class="flex-1 overflow-y-auto space-y-5 pr-1">
+    <div class="flex-1 overflow-y-auto space-y-5 px-6">
       {#if loading}
         <p class="text-sm text-muted-foreground">Loading options...</p>
       {:else}
@@ -305,5 +305,5 @@ function toggleOption(key: keyof ContextOptions) {
         </div>
       {/if}
     </div>
-  </Sheet.Content>
+  </Sheet.ResizableContent>
 </Sheet.Root>

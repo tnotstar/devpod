@@ -2,14 +2,16 @@
 import { page } from "$app/stores"
 import { goto } from "$app/navigation"
 import { onMount, onDestroy } from "svelte"
+import { Trash2 } from "@lucide/svelte"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import { Separator } from "$lib/components/ui/separator/index.js"
+import * as Accordion from "$lib/components/ui/accordion/index.js"
 import * as Select from "$lib/components/ui/select/index.js"
-import * as Table from "$lib/components/ui/table/index.js"
 import * as Tabs from "$lib/components/ui/tabs/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
 import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
+import LogTable from "$lib/components/log/LogTable.svelte"
 import TerminalComponent from "$lib/components/terminal/Terminal.svelte"
 import { workspaces } from "$lib/stores/workspaces.js"
 import { addTerminal, removeTerminal } from "$lib/stores/terminals.js"
@@ -22,6 +24,7 @@ import {
   workspaceDelete,
   workspaceLogsList,
   workspaceLogRead,
+  workspaceLogDelete,
   auditByResource,
 } from "$lib/ipc/commands.js"
 import { onCommandProgress } from "$lib/ipc/events.js"
@@ -29,7 +32,7 @@ import { toasts } from "$lib/stores/toasts.js"
 import type { AuditEntry, LogEntry } from "$lib/types/index.js"
 import type { UnlistenFn } from "@tauri-apps/api/event"
 import { formatTimestamp } from "$lib/utils/time.js"
-import { parseLogLine, stripAnsi } from "$lib/utils/log-parser.js"
+import { stripAnsi } from "$lib/utils/log-parser.js"
 
 const IDE_OPTIONS = [
   { value: "none", label: "None" },
@@ -77,7 +80,6 @@ function statusBadgeVariant(): "default" | "secondary" | "outline" {
 
 let activeTab = $state("overview")
 let outputLines = $state<string[]>([])
-let parsedLines = $derived(outputLines.map(parseLogLine))
 let commandId = $state<string | null>(null)
 let operationLabel = $state("")
 let operationRunning = $state(false)
@@ -195,6 +197,20 @@ async function viewLog(entry: LogEntry) {
   }
 }
 
+async function deleteLog(entry: LogEntry) {
+  try {
+    await workspaceLogDelete(id, entry.filename)
+    logEntries = logEntries.filter((e) => e.filename !== entry.filename)
+    if (selectedLog === entry.filename) {
+      selectedLog = null
+      logContent = ""
+    }
+    toasts.success("Log file deleted")
+  } catch (err) {
+    toasts.error(`Failed to delete log: ${err}`)
+  }
+}
+
 async function handleConnect() {
   connecting = true
   try {
@@ -237,7 +253,7 @@ function startStreamingOp(label: string) {
   operationLabel = label
   operationRunning = true
   outputLines = []
-  activeTab = "output"
+  activeTab = "logs"
 }
 
 async function handleStart() {
@@ -356,9 +372,8 @@ async function handleDelete() {
     <Tabs.Root bind:value={activeTab} class="min-h-0 flex-1">
       <Tabs.List variant="line">
         <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
-        <Tabs.Trigger value="output">Live Output</Tabs.Trigger>
-        <Tabs.Trigger value="terminal">Terminal</Tabs.Trigger>
         <Tabs.Trigger value="logs">Logs</Tabs.Trigger>
+        <Tabs.Trigger value="terminal">Terminal</Tabs.Trigger>
         <Tabs.Trigger value="activity">Activity</Tabs.Trigger>
       </Tabs.List>
 
@@ -391,8 +406,8 @@ async function handleDelete() {
                 }
               }}
             >
-              <Select.Trigger class="h-8 w-48">
-                <span>{IDE_OPTIONS.find((i) => i.value === (workspace.ide?.name ?? "none"))?.label ?? "None"}</span>
+              <Select.Trigger class="h-8 w-48 text-left">
+                <span class="truncate">{IDE_OPTIONS.find((i) => i.value === (workspace.ide?.name ?? "none"))?.label ?? "None"}</span>
               </Select.Trigger>
               <Select.Content class="max-h-80">
                 {#each IDE_OPTIONS as ide (ide.value)}
@@ -429,55 +444,104 @@ async function handleDelete() {
         </div>
       </Tabs.Content>
 
-      <Tabs.Content value="output" class="min-h-0 flex-1">
+      <Tabs.Content value="logs" class="min-h-0 flex-1">
         <div class="mt-4 flex min-h-0 flex-1 flex-col h-full">
-          {#if outputLines.length > 0}
-            <div class="flex justify-end gap-2 shrink-0 mb-2">
-              <Button variant="outline" size="sm" onclick={() => copyToClipboard(outputLines.map(stripAnsi).join("\n"))}>
-                Copy Output
-              </Button>
-              <Button variant="outline" size="sm" onclick={() => { outputLines = [] }}>
-                Clear
-              </Button>
-            </div>
-          {/if}
-          <ScrollArea class="min-h-0 flex-1 rounded-md border">
-            {#if outputLines.length === 0}
-              <div class="flex items-center justify-center h-full p-4">
-                <p class="text-sm text-muted-foreground">
-                  {operationRunning ? "Waiting for output..." : "No output yet. Run an operation to see live output."}
-                </p>
-              </div>
-            {:else}
-              <Table.Root>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.Head class="w-20">Time</Table.Head>
-                    <Table.Head class="w-16">Level</Table.Head>
-                    <Table.Head>Message</Table.Head>
-                    <Table.Head class="w-40 text-right">Source</Table.Head>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {#each parsedLines as line, i (i)}
-                    <Table.Row class={line.level === "fatal" || line.level === "error" ? "bg-destructive/5" : line.level === "warn" ? "bg-amber-500/5" : ""}>
-                      <Table.Cell class="font-mono text-xs text-muted-foreground">{line.time}</Table.Cell>
-                      <Table.Cell>
-                        {#if line.level}
-                          <span class={badgeVariants({ variant: line.level === "fatal" || line.level === "error" ? "destructive" : line.level === "warn" ? "outline" : "secondary" })}>
-                            {line.level}
-                          </span>
-                        {/if}
-                      </Table.Cell>
-                      <Table.Cell class="text-sm">{line.message}</Table.Cell>
-                      <Table.Cell class="font-mono text-xs text-muted-foreground text-right">{line.source}</Table.Cell>
-                    </Table.Row>
-                  {/each}
-                </Table.Body>
-              </Table.Root>
-              <div bind:this={tableEndEl}></div>
-            {/if}
-          </ScrollArea>
+          <Accordion.Root type="multiple" value={["live-output", "log-files"]}>
+            <Accordion.Item value="live-output">
+              <Accordion.Trigger>
+                Live Output
+                {#if outputLines.length > 0}
+                  <span class="ml-2 text-xs text-muted-foreground">({outputLines.length} lines)</span>
+                {/if}
+                {#if operationRunning}
+                  <span class="ml-2 text-xs text-muted-foreground animate-pulse">streaming...</span>
+                {/if}
+              </Accordion.Trigger>
+              <Accordion.Content>
+                {#if outputLines.length > 0}
+                  <div class="flex justify-end gap-2 mb-2">
+                    <Button variant="outline" size="sm" onclick={() => copyToClipboard(outputLines.map(stripAnsi).join("\n"))}>
+                      Copy Output
+                    </Button>
+                    <Button variant="outline" size="sm" onclick={() => { outputLines = [] }}>
+                      Clear
+                    </Button>
+                  </div>
+                {/if}
+                <ScrollArea class="max-h-96 rounded-md border">
+                  {#if outputLines.length === 0}
+                    <div class="flex items-center justify-center p-4">
+                      <p class="text-sm text-muted-foreground">
+                        {operationRunning ? "Waiting for output..." : "No output yet. Run an operation to see live output."}
+                      </p>
+                    </div>
+                  {:else}
+                    <LogTable lines={outputLines} />
+                    <div bind:this={tableEndEl}></div>
+                  {/if}
+                </ScrollArea>
+              </Accordion.Content>
+            </Accordion.Item>
+
+            <Accordion.Item value="log-files">
+              <Accordion.Trigger>
+                Log Files
+                {#if logEntries.length > 0}
+                  <span class="ml-2 text-xs text-muted-foreground">({logEntries.length} files)</span>
+                {/if}
+              </Accordion.Trigger>
+              <Accordion.Content>
+                <div class="flex justify-end gap-2 mb-2">
+                  <Button variant="outline" size="sm" onclick={loadLogs} disabled={logsLoading}>
+                    {logsLoading ? "Loading..." : "Refresh"}
+                  </Button>
+                  {#if selectedLog && logContent}
+                    <Button variant="outline" size="sm" onclick={() => copyToClipboard(logContent)}>
+                      Copy Log
+                    </Button>
+                  {/if}
+                </div>
+                {#if logsLoading}
+                  <p class="text-sm text-muted-foreground">Loading logs...</p>
+                {:else if logEntries.length === 0}
+                  <p class="text-sm text-muted-foreground">No log files found for this workspace.</p>
+                {:else}
+                  <div class="flex gap-4">
+                    <div class="w-64 space-y-1 shrink-0">
+                      {#each logEntries as entry}
+                        <div class="group/log flex items-center gap-1 rounded hover:bg-muted {selectedLog === entry.filename ? 'bg-muted' : ''}">
+                          <button
+                            class="min-w-0 flex-1 px-3 py-2 text-left text-sm {selectedLog === entry.filename ? 'font-medium' : ''}"
+                            onclick={() => viewLog(entry)}
+                          >
+                            <div class="truncate">{entry.filename}</div>
+                            <div class="text-xs text-muted-foreground">
+                              {Math.round(entry.sizeBytes / 1024)}KB
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            class="shrink-0 rounded p-1.5 mr-1 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover/log:opacity-60 hover:!opacity-100"
+                            title="Delete log"
+                            onclick={() => deleteLog(entry)}
+                          >
+                            <Trash2 class="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      {/each}
+                    </div>
+                    <ScrollArea class="max-h-96 flex-1 rounded-md border">
+                      {#if selectedLog}
+                        <LogTable lines={logContent.split("\n")} />
+                      {:else}
+                        <p class="p-4 text-sm text-muted-foreground">Select a log file to view.</p>
+                      {/if}
+                    </ScrollArea>
+                  </div>
+                {/if}
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion.Root>
         </div>
       </Tabs.Content>
 
@@ -498,51 +562,6 @@ async function handleDelete() {
                   {connecting ? "Connecting..." : "Connect to workspace"}
                 </Button>
               </div>
-            </div>
-          {/if}
-        </div>
-      </Tabs.Content>
-
-      <Tabs.Content value="logs">
-        <div class="mt-4 space-y-4">
-          <div class="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onclick={loadLogs} disabled={logsLoading}>
-              {logsLoading ? "Loading..." : "Refresh"}
-            </Button>
-            {#if selectedLog && logContent}
-              <Button variant="outline" size="sm" onclick={() => copyToClipboard(logContent)}>
-                Copy Log
-              </Button>
-            {/if}
-          </div>
-          {#if logsLoading}
-            <p class="text-sm text-muted-foreground">Loading logs...</p>
-          {:else if logEntries.length === 0}
-            <p class="text-sm text-muted-foreground">
-              No logs found for this workspace.
-            </p>
-          {:else}
-            <div class="flex gap-4">
-              <div class="w-64 space-y-1">
-                {#each logEntries as entry}
-                  <button
-                    class="w-full rounded px-3 py-2 text-left text-sm hover:bg-muted {selectedLog === entry.filename ? 'bg-muted font-medium' : ''}"
-                    onclick={() => viewLog(entry)}
-                  >
-                    <div class="truncate">{entry.filename}</div>
-                    <div class="text-xs text-muted-foreground">
-                      {Math.round(entry.sizeBytes / 1024)}KB
-                    </div>
-                  </button>
-                {/each}
-              </div>
-              <ScrollArea class="h-96 flex-1 rounded-md border bg-muted/50 p-4">
-                {#if selectedLog}
-                  <pre class="text-xs font-mono whitespace-pre-wrap">{logContent}</pre>
-                {:else}
-                  <p class="text-sm text-muted-foreground">Select a log file to view.</p>
-                {/if}
-              </ScrollArea>
             </div>
           {/if}
         </div>

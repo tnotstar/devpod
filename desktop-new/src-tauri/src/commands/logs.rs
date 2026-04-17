@@ -24,3 +24,15 @@ pub async fn workspace_log_read(
         .await
         .map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub async fn workspace_log_delete(
+    log_store: State<'_, Arc<LogStore>>,
+    workspace_id: String,
+    filename: String,
+) -> Result<(), String> {
+    log_store
+        .delete_log(&workspace_id, &filename)
+        .await
+        .map_err(|e| e.to_string())
+}

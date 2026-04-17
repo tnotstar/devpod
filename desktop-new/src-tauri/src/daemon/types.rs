@@ -24,7 +24,7 @@ pub struct Workspace {
     pub dev_container_path: String,
     #[serde(default)]
     pub creation_timestamp: String,
-    #[serde(default, rename = "lastUsed")]
+    #[serde(default, alias = "lastUsed")]
     pub last_used_timestamp: String,
     #[serde(default)]
     pub context: String,
@@ -46,7 +46,7 @@ pub struct WorkspaceProviderConfig {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceMachineConfig {
-    #[serde(default, rename = "machineId")]
+    #[serde(default, alias = "machineId")]
     pub id: String,
     #[serde(default)]
     pub auto_delete: bool,
@@ -70,7 +70,7 @@ pub struct WorkspaceSource {
     pub git_branch: String,
     #[serde(default)]
     pub git_commit: String,
-    #[serde(default, rename = "gitSubDir")]
+    #[serde(default, alias = "gitSubDir")]
     pub git_sub_path: String,
     #[serde(default)]
     pub local_folder: String,

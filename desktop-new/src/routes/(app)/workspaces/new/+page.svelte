@@ -236,11 +236,11 @@ async function handleSubmit() {
     <div class="space-y-2">
       <Label>Provider</Label>
       <Select.Root type="single" bind:value={selectedProvider} disabled={submitting}>
-        <Select.Trigger class="w-full">
+        <Select.Trigger class="w-full text-left">
           {#if selectedProvider}
-            <span>{selectedProvider}</span>
+            <span class="truncate">{selectedProvider}</span>
           {:else}
-            <span class="text-muted-foreground">Select a provider</span>
+            <span class="truncate text-muted-foreground">Select a provider</span>
           {/if}
         </Select.Trigger>
         <Select.Content class="w-[var(--bits-select-trigger-width)]">
@@ -254,11 +254,11 @@ async function handleSubmit() {
     <div class="space-y-2">
       <Label>IDE</Label>
       <Select.Root type="single" bind:value={selectedIde} disabled={submitting}>
-        <Select.Trigger class="w-full">
+        <Select.Trigger class="w-full text-left">
           {#if selectedIde}
-            <span>{ALL_IDES.find((i) => i.value === selectedIde)?.label ?? selectedIde}</span>
+            <span class="truncate">{ALL_IDES.find((i) => i.value === selectedIde)?.label ?? selectedIde}</span>
           {:else}
-            <span class="text-muted-foreground">Select an IDE</span>
+            <span class="truncate text-muted-foreground">Select an IDE</span>
           {/if}
         </Select.Trigger>
         <Select.Content class="max-h-80 w-[var(--bits-select-trigger-width)]">

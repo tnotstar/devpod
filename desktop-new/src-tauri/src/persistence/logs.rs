@@ -108,6 +108,14 @@ impl LogStore {
             .with_context(|| format!("Failed to read log: {}", path.display()))
     }
 
+    /// Delete a single log file.
+    pub async fn delete_log(&self, workspace_id: &str, filename: &str) -> Result<()> {
+        let path = self.base_dir.join(workspace_id).join(filename);
+        fs::remove_file(&path)
+            .await
+            .with_context(|| format!("Failed to delete log: {}", path.display()))
+    }
+
     /// Remove log files older than `max_age` days.
     pub async fn prune(&self, max_age_days: i64) -> Result<u64> {
         let cutoff = Utc::now() - chrono::Duration::days(max_age_days);
