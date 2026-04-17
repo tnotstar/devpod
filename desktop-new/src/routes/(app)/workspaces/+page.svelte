@@ -59,13 +59,6 @@ let filtered = $derived.by(() => {
   return list
 })
 
-function sourceDisplay(ws: Workspace): string {
-  if (ws.source?.gitRepository) return ws.source.gitRepository
-  if (ws.source?.localFolder) return ws.source.localFolder
-  if (ws.source?.image) return ws.source.image
-  return ""
-}
-
 function statusVariant(status?: string): "default" | "secondary" | "outline" {
   const s = status?.toLowerCase()
   if (s === "running") return "default"
@@ -165,7 +158,7 @@ async function handleDelete() {
   </div>
 
   {#if $workspacesLoading}
-    <TableSkeleton rows={5} columns={7} />
+    <TableSkeleton rows={5} columns={6} />
   {:else if filtered.length === 0}
     <div class="flex flex-col items-center justify-center gap-4 py-16 text-center">
       {#if search}
@@ -183,7 +176,6 @@ async function handleDelete() {
         <Table.Header>
           <Table.Row>
             <Table.Head>Name</Table.Head>
-            <Table.Head>Source</Table.Head>
             <Table.Head>Provider</Table.Head>
             <Table.Head>IDE</Table.Head>
             <Table.Head>Status</Table.Head>
@@ -199,7 +191,6 @@ async function handleDelete() {
               onclick={() => goto(`/workspaces/${ws.id}`)}
             >
               <Table.Cell class="font-medium">{ws.id}</Table.Cell>
-              <Table.Cell class="max-w-[200px] truncate text-muted-foreground">{sourceDisplay(ws)}</Table.Cell>
               <Table.Cell>
                 {#if ws.provider?.name}
                   <span class={badgeVariants({ variant: "secondary" })}>{ws.provider.name}</span>
