@@ -9,6 +9,11 @@ import {
   onTerminalExit,
 } from "$lib/ipc/terminal.js"
 import { theme } from "$lib/stores/settings.js"
+import {
+  getTerminalInstance,
+  setTerminalInstance,
+  type TerminalInstance,
+} from "$lib/stores/terminal-instances.js"
 import { get } from "svelte/store"
 
 let {
@@ -21,9 +26,6 @@ let containerEl: HTMLDivElement | undefined = $state()
 
 let term: Terminal | undefined
 let fitAddon: FitAddon | undefined
-let unlistenOutput: (() => void) | undefined
-let unlistenExit: (() => void) | undefined
-let unsubscribeTheme: (() => void) | undefined
 let resizeObserver: ResizeObserver | undefined
 
 const darkTheme = {
@@ -51,51 +53,74 @@ function isDark(): boolean {
 onMount(async () => {
   if (!containerEl) return
 
-  // Dynamic imports — xterm requires DOM APIs not available during SSR
-  const [{ Terminal: XTerm }, { FitAddon: XFitAddon }] = await Promise.all([
-    import("@xterm/xterm"),
-    import("@xterm/addon-fit"),
-  ])
-  await import("@xterm/xterm/css/xterm.css")
+  const existing = getTerminalInstance(sessionId)
+  if (existing) {
+    // Reattach existing terminal to the new container
+    term = existing.term
+    fitAddon = existing.fitAddon
+    const el = term.element?.parentElement ?? term.element
+    if (el) containerEl.appendChild(el)
+    requestAnimationFrame(() => {
+      fitAddon?.fit()
+      term?.refresh(0, term!.rows - 1)
+      term?.focus()
+    })
+  } else {
+    // Create new terminal instance
+    const [{ Terminal: XTerm }, { FitAddon: XFitAddon }] = await Promise.all([
+      import("@xterm/xterm"),
+      import("@xterm/addon-fit"),
+    ])
+    await import("@xterm/xterm/css/xterm.css")
 
-  term = new XTerm({
-    cursorBlink: true,
-    fontSize: 14,
-    fontFamily: "monospace",
-    theme: isDark() ? darkTheme : lightTheme,
-  })
+    term = new XTerm({
+      cursorBlink: true,
+      fontSize: 14,
+      fontFamily: "monospace",
+      theme: isDark() ? darkTheme : lightTheme,
+    })
 
-  unsubscribeTheme = theme.subscribe(() => {
-    if (term) {
-      term.options.theme = isDark() ? darkTheme : lightTheme
-    }
-  })
+    fitAddon = new XFitAddon()
+    term.loadAddon(fitAddon)
+    term.open(containerEl)
+    fitAddon.fit()
 
-  fitAddon = new XFitAddon()
-  term.loadAddon(fitAddon)
-  term.open(containerEl)
-  fitAddon.fit()
+    term.onData((data) => {
+      const encoded = new TextEncoder().encode(data)
+      terminalWrite(sessionId, Array.from(encoded))
+    })
 
-  term.onData((data) => {
-    const encoded = new TextEncoder().encode(data)
-    terminalWrite(sessionId, Array.from(encoded))
-  })
+    const unlistenOutput = await onTerminalOutput((sid, data) => {
+      if (sid === sessionId && term) {
+        term.write(data)
+      }
+    })
 
-  unlistenOutput = await onTerminalOutput((sid, data) => {
-    if (sid === sessionId && term) {
-      term.write(data)
-    }
-  })
+    const unlistenExit = await onTerminalExit((sid) => {
+      if (sid === sessionId) {
+        onExit?.()
+      }
+    })
 
-  unlistenExit = await onTerminalExit((sid) => {
-    if (sid === sessionId) {
-      onExit?.()
-    }
-  })
+    const unsubscribeTheme = theme.subscribe(() => {
+      if (term) {
+        term.options.theme = isDark() ? darkTheme : lightTheme
+      }
+    })
+
+    setTerminalInstance(sessionId, {
+      term,
+      fitAddon,
+      unlistenOutput,
+      unlistenExit,
+      unsubscribeTheme,
+    })
+  }
 
   resizeObserver = new ResizeObserver(() => {
     if (fitAddon && term) {
       fitAddon.fit()
+      term.refresh(0, term.rows - 1)
       terminalResize(sessionId, term.cols, term.rows)
     }
   })
@@ -105,20 +130,17 @@ onMount(async () => {
 // Refit and focus when tab becomes active
 $effect(() => {
   if (active && fitAddon && term) {
-    // Use requestAnimationFrame to ensure the container is visible before fitting
     requestAnimationFrame(() => {
       fitAddon?.fit()
+      term?.refresh(0, term!.rows - 1)
       term?.focus()
     })
   }
 })
 
 onDestroy(() => {
+  // Only disconnect the observer — keep the terminal instance alive
   resizeObserver?.disconnect()
-  unlistenOutput?.()
-  unlistenExit?.()
-  unsubscribeTheme?.()
-  term?.dispose()
 })
 </script>
 

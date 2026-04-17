@@ -17,6 +17,7 @@ import {
   removeTerminal,
   renameTerminal,
 } from "$lib/stores/terminals.js"
+import { destroyTerminalInstance } from "$lib/stores/terminal-instances.js"
 import { workspaces } from "$lib/stores/workspaces.js"
 import TerminalComponent from "$lib/components/terminal/Terminal.svelte"
 import { Button } from "$lib/components/ui/button/index.js"
@@ -80,6 +81,7 @@ async function closeSession(id: string) {
   } catch {
     // session may already be gone
   }
+  destroyTerminalInstance(id)
   removeTerminal(id)
   if (activeSessionId === id) {
     activeSessionId = $terminals.length > 0 ? $terminals[0].id : undefined
@@ -88,6 +90,7 @@ async function closeSession(id: string) {
 
 function handleExit() {
   if (activeSessionId) {
+    destroyTerminalInstance(activeSessionId)
     removeTerminal(activeSessionId)
     activeSessionId = $terminals.length > 0 ? $terminals[0].id : undefined
   }

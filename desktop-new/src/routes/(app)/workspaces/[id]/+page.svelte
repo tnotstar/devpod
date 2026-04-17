@@ -15,6 +15,7 @@ import LogTable from "$lib/components/log/LogTable.svelte"
 import TerminalComponent from "$lib/components/terminal/Terminal.svelte"
 import { workspaces } from "$lib/stores/workspaces.js"
 import { addTerminal, removeTerminal } from "$lib/stores/terminals.js"
+import { destroyTerminalInstance } from "$lib/stores/terminal-instances.js"
 import { terminalCreateSsh, terminalClose } from "$lib/ipc/terminal.js"
 import {
   workspaceUp,
@@ -162,6 +163,7 @@ onDestroy(() => {
   // Clean up SSH session if navigating away
   if (sshSessionId) {
     terminalClose(sshSessionId).catch(() => {})
+    destroyTerminalInstance(sshSessionId)
     removeTerminal(sshSessionId)
   }
 })
@@ -238,12 +240,14 @@ async function handleDisconnect() {
   } catch {
     // session may already be gone
   }
+  destroyTerminalInstance(sshSessionId)
   removeTerminal(sshSessionId)
   sshSessionId = null
 }
 
 function handleSshExit() {
   if (sshSessionId) {
+    destroyTerminalInstance(sshSessionId)
     removeTerminal(sshSessionId)
     sshSessionId = null
   }
