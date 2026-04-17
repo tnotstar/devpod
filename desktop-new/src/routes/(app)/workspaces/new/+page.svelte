@@ -58,64 +58,49 @@ const ALL_IDES = IDE_GROUPS.flatMap((g) => g.options)
 
 const TEMPLATES = [
   {
-    name: "Node.js",
-    source: "github.com/devcontainers/templates/src/javascript-node",
-    icon: "JS",
-  },
-  {
     name: "Python",
-    source: "github.com/devcontainers/templates/src/python",
+    source: "https://github.com/microsoft/vscode-remote-try-python",
     icon: "PY",
   },
   {
+    name: "Node.js",
+    source: "https://github.com/microsoft/vscode-remote-try-node",
+    icon: "JS",
+  },
+  {
     name: "Go",
-    source: "github.com/devcontainers/templates/src/go",
+    source: "https://github.com/microsoft/vscode-remote-try-go",
     icon: "GO",
   },
   {
     name: "Rust",
-    source: "github.com/devcontainers/templates/src/rust",
+    source: "https://github.com/microsoft/vscode-remote-try-rust",
     icon: "RS",
   },
   {
-    name: "TypeScript",
-    source: "github.com/devcontainers/templates/src/typescript-node",
-    icon: "TS",
-  },
-  {
     name: "Java",
-    source: "github.com/devcontainers/templates/src/java",
+    source: "https://github.com/microsoft/vscode-remote-try-java",
     icon: "JV",
   },
   {
-    name: ".NET",
-    source: "github.com/devcontainers/templates/src/dotnet",
-    icon: "C#",
-  },
-  {
-    name: "Ruby",
-    source: "github.com/devcontainers/templates/src/ruby",
-    icon: "RB",
-  },
-  {
     name: "PHP",
-    source: "github.com/devcontainers/templates/src/php",
+    source: "https://github.com/microsoft/vscode-remote-try-php",
     icon: "PHP",
   },
   {
     name: "C++",
-    source: "github.com/devcontainers/templates/src/cpp",
+    source: "https://github.com/microsoft/vscode-remote-try-cpp",
     icon: "C++",
   },
   {
-    name: "Ubuntu",
-    source: "github.com/devcontainers/templates/src/ubuntu",
-    icon: "UB",
+    name: ".NET",
+    source: "https://github.com/microsoft/vscode-remote-try-dotnet",
+    icon: "C#",
   },
   {
-    name: "Alpine",
-    source: "github.com/devcontainers/templates/src/alpine",
-    icon: "AL",
+    name: "Ruby",
+    source: "https://github.com/skevetter/devpod-quickstart-ruby",
+    icon: "RB",
   },
 ]
 
