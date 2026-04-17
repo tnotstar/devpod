@@ -74,6 +74,7 @@ export interface Provider {
   description?: string
   options?: Record<string, ProviderOption>
   optionGroups?: ProviderOptionGroup[]
+  isDefault?: boolean
   state?: {
     initialized?: boolean
     singleMachine?: boolean

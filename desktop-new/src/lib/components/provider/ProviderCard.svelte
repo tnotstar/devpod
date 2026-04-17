@@ -53,13 +53,18 @@ async function handleDelete() {
   onclick={() => goto(`/providers/${provider.name}`)}
 >
   <div class="flex items-start justify-between gap-2">
-    <h3 class="font-semibold truncate">{provider.name}</h3>
-    <div class="flex gap-1">
+    <div class="flex items-center gap-2 min-w-0">
+      <h3 class="font-semibold truncate">{provider.name}</h3>
+      {#if provider.isDefault}
+        <span class={badgeVariants({ variant: "default" })}>default</span>
+      {/if}
+    </div>
+    <div class="flex gap-1 shrink-0">
       {#if provider.state?.initialized}
-        <span class={badgeVariants({ variant: "default" })}>initialized</span>
+        <span class={badgeVariants({ variant: "secondary" })}>initialized</span>
       {/if}
       {#if provider.version}
-        <span class={badgeVariants({ variant: "secondary" })}>{provider.version}</span>
+        <span class={badgeVariants({ variant: "outline" })}>{provider.version}</span>
       {/if}
     </div>
   </div>

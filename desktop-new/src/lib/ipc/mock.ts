@@ -65,6 +65,7 @@ const PROVIDERS: Provider[] = [
     version: "v0.5.0",
     source: { github: "loft-sh/devpod-provider-docker" },
     description: "DevPod on Docker",
+    isDefault: true,
     state: { initialized: true, singleMachine: true },
   },
   {
@@ -261,6 +262,27 @@ const COMMANDS: Record<string, Handler> = {
   // Contexts
   context_list: () => ({ contexts: CONTEXTS, activeContext: "default" }),
   context_use: () => undefined,
+  context_options: () => ({
+    DEBUG: { value: "false" },
+    TELEMETRY: { value: "true" },
+    AGENT_URL: { value: "" },
+    DOTFILES_URL: { value: "" },
+    SSH_KEY_PATH: { value: "" },
+    HTTP_PROXY: { value: "" },
+    HTTPS_PROXY: { value: "" },
+    NO_PROXY: { value: "" },
+    DOCKER_CREDENTIAL_HELPER_ENABLED: { value: "false" },
+    GIT_CREDENTIAL_HELPER_ENABLED: { value: "false" },
+    GIT_SSH_SIGNATURE_FORWARDING_ENABLED: { value: "false" },
+    SSH_AGENT_FORWARDING: { value: "false" },
+    SSH_ADD_PRIVATE_KEYS: { value: "false" },
+    SSH_STRICT_HOST_KEY_CHECKING: { value: "false" },
+    GPG_AGENT_FORWARDING: { value: "false" },
+    ADDITIONAL_FLAGS: { value: "" },
+    ADDITIONAL_ENV_VARS: { value: "" },
+    EXPERIMENTAL_MULTI_DEVCONTAINER: { value: "false" },
+  }),
+  context_set_options: () => undefined,
 
   // Audit
   audit_recent: (args) => {

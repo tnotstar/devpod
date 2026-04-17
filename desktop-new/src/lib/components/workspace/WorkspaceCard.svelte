@@ -115,8 +115,12 @@ async function handleDelete() {
     {/if}
   </div>
 
-  <div class="mt-3 flex gap-2">
-    {#if isStopped}
+  <div class="mt-3 flex items-center gap-2">
+    {#if isRunning}
+      <Button size="sm" onclick={(e) => { e.stopPropagation(); goto(`/workspaces/${workspace.id}?tab=terminal`) }}>
+        Open
+      </Button>
+    {:else if isStopped}
       <Button size="sm" onclick={handleStart} disabled={acting}>
         {acting ? "Starting..." : "Start"}
       </Button>
@@ -126,6 +130,9 @@ async function handleDelete() {
         {acting ? "Stopping..." : "Stop"}
       </Button>
     {/if}
+    <Button variant="outline" size="sm" onclick={(e) => { e.stopPropagation(); goto(`/workspaces/${workspace.id}`) }}>
+      Details
+    </Button>
     <Button variant="destructive" size="sm" onclick={openDeleteConfirm} disabled={acting}>Delete</Button>
   </div>
 </button>

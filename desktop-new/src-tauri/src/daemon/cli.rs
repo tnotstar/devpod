@@ -5,6 +5,29 @@ use thiserror::Error;
 use tokio::process::Command;
 use tokio::sync::mpsc;
 
+/// Strip ANSI escape sequences from a string.
+fn strip_ansi(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\x1b' {
+            // Skip CSI sequences: ESC [ ... final_byte
+            if chars.peek() == Some(&'[') {
+                chars.next();
+                while let Some(&next) = chars.peek() {
+                    chars.next();
+                    if next.is_ascii_alphabetic() || next == 'm' {
+                        break;
+                    }
+                }
+            }
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
+
 #[derive(Error, Debug)]
 pub enum CliError {
     #[error("devpod binary not found at {0}")]
@@ -47,7 +70,7 @@ impl CliRunner {
             .await?;
 
         if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let stderr = strip_ansi(&String::from_utf8_lossy(&output.stderr));
             return Err(CliError::CommandFailed {
                 code: output.status.code().unwrap_or(-1),
                 stderr,
@@ -65,7 +88,7 @@ impl CliRunner {
             .await?;
 
         if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let stderr = strip_ansi(&String::from_utf8_lossy(&output.stderr));
             return Err(CliError::CommandFailed {
                 code: output.status.code().unwrap_or(-1),
                 stderr,

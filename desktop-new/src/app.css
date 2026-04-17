@@ -56,3 +56,14 @@
     color: hsl(var(--foreground));
   }
 }
+
+/* Zoom levels */
+.zoom-sm {
+  font-size: 14px;
+}
+.zoom-lg {
+  font-size: 18px;
+}
+.zoom-xl {
+  font-size: 20px;
+}

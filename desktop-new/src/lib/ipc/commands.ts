@@ -129,6 +129,19 @@ export async function contextUse(name: string): Promise<void> {
   return invoke("context_use", { name })
 }
 
+export async function contextOptions(
+  context?: string,
+): Promise<Record<string, { value?: string }>> {
+  return invoke("context_options", { context })
+}
+
+export async function contextSetOptions(
+  options: string[],
+  context?: string,
+): Promise<void> {
+  return invoke("context_set_options", { options, context })
+}
+
 // Audit commands
 export async function auditRecent(limit?: number): Promise<AuditEntry[]> {
   return invoke<AuditEntry[]>("audit_recent", { limit })

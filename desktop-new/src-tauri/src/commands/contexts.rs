@@ -40,3 +40,42 @@ pub async fn context_use(
     result.map_err(|e| e.to_string())?;
     Ok(())
 }
+
+#[tauri::command]
+pub async fn context_options(
+    cli: State<'_, Arc<CliRunner>>,
+    context: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut args = vec!["context", "options"];
+    let ctx;
+    if let Some(ref name) = context {
+        ctx = name.clone();
+        args.push("--name");
+        args.push(&ctx);
+    }
+    cli.run::<serde_json::Value>(&args)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn context_set_options(
+    cli: State<'_, Arc<CliRunner>>,
+    options: Vec<String>,
+    context: Option<String>,
+) -> Result<(), String> {
+    let mut args: Vec<&str> = vec!["context", "set-options"];
+    let ctx;
+    if let Some(ref name) = context {
+        ctx = name.clone();
+        args.push("--name");
+        args.push(&ctx);
+    }
+    let option_refs: Vec<&str> = options.iter().map(|s| s.as_str()).collect();
+    for opt in &option_refs {
+        args.push("-o");
+        args.push(opt);
+    }
+    cli.run_raw(&args).await.map_err(|e| e.to_string())?;
+    Ok(())
+}

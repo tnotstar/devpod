@@ -12,15 +12,108 @@ import { providers } from "$lib/stores/providers.js"
 import { toasts } from "$lib/stores/toasts.js"
 import type { UnlistenFn } from "@tauri-apps/api/event"
 
-const IDE_OPTIONS = [
-  { value: "vscode", label: "VS Code" },
-  { value: "openvscode", label: "OpenVSCode" },
-  { value: "intellij", label: "IntelliJ" },
-  { value: "goland", label: "GoLand" },
-  { value: "pycharm", label: "PyCharm" },
-  { value: "fleet", label: "Fleet" },
-  { value: "jupyternotebook", label: "Jupyter Notebook" },
-  { value: "none", label: "None" },
+const IDE_GROUPS = [
+  {
+    label: "Primary",
+    options: [
+      { value: "vscode", label: "VS Code" },
+      { value: "vscode-insiders", label: "VS Code Insiders" },
+      { value: "cursor", label: "Cursor" },
+      { value: "windsurf", label: "Windsurf" },
+      { value: "codium", label: "VSCodium" },
+      { value: "positron", label: "Positron" },
+      { value: "openvscode", label: "OpenVSCode (Browser)" },
+      { value: "zed", label: "Zed" },
+    ],
+  },
+  {
+    label: "JetBrains",
+    options: [
+      { value: "intellij", label: "IntelliJ IDEA" },
+      { value: "goland", label: "GoLand" },
+      { value: "pycharm", label: "PyCharm" },
+      { value: "phpstorm", label: "PhpStorm" },
+      { value: "webstorm", label: "WebStorm" },
+      { value: "rustrover", label: "RustRover" },
+      { value: "clion", label: "CLion" },
+      { value: "rider", label: "Rider" },
+      { value: "rubymine", label: "RubyMine" },
+      { value: "fleet", label: "Fleet" },
+    ],
+  },
+  {
+    label: "Other",
+    options: [
+      { value: "jupyternotebook", label: "Jupyter Notebook" },
+      { value: "rstudio", label: "RStudio" },
+      { value: "none", label: "None (SSH only)" },
+    ],
+  },
+]
+
+const ALL_IDES = IDE_GROUPS.flatMap((g) => g.options)
+
+const TEMPLATES = [
+  {
+    name: "Node.js",
+    source: "github.com/devcontainers/templates/src/javascript-node",
+    icon: "JS",
+  },
+  {
+    name: "Python",
+    source: "github.com/devcontainers/templates/src/python",
+    icon: "PY",
+  },
+  {
+    name: "Go",
+    source: "github.com/devcontainers/templates/src/go",
+    icon: "GO",
+  },
+  {
+    name: "Rust",
+    source: "github.com/devcontainers/templates/src/rust",
+    icon: "RS",
+  },
+  {
+    name: "TypeScript",
+    source: "github.com/devcontainers/templates/src/typescript-node",
+    icon: "TS",
+  },
+  {
+    name: "Java",
+    source: "github.com/devcontainers/templates/src/java",
+    icon: "JV",
+  },
+  {
+    name: ".NET",
+    source: "github.com/devcontainers/templates/src/dotnet",
+    icon: "C#",
+  },
+  {
+    name: "Ruby",
+    source: "github.com/devcontainers/templates/src/ruby",
+    icon: "RB",
+  },
+  {
+    name: "PHP",
+    source: "github.com/devcontainers/templates/src/php",
+    icon: "PHP",
+  },
+  {
+    name: "C++",
+    source: "github.com/devcontainers/templates/src/cpp",
+    icon: "C++",
+  },
+  {
+    name: "Ubuntu",
+    source: "github.com/devcontainers/templates/src/ubuntu",
+    icon: "UB",
+  },
+  {
+    name: "Alpine",
+    source: "github.com/devcontainers/templates/src/alpine",
+    icon: "AL",
+  },
 ]
 
 let source = $state("")
@@ -108,6 +201,22 @@ async function handleSubmit() {
     <h1 class="text-2xl font-bold">Create Workspace</h1>
   </div>
 
+  <div class="space-y-3">
+    <h2 class="text-sm font-semibold">Quick Start Templates</h2>
+    <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+      {#each TEMPLATES as template (template.name)}
+        <button
+          type="button"
+          class="flex flex-col items-center gap-1.5 rounded-lg border bg-card p-3 text-center text-sm transition-colors hover:bg-accent/50 active:scale-[0.98] {source === template.source ? 'border-primary ring-1 ring-primary' : ''}"
+          onclick={() => { source = template.source; name = template.name.toLowerCase().replace(/[^a-z0-9]/g, '-') }}
+        >
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-bold">{template.icon}</span>
+          <span class="truncate text-xs">{template.name}</span>
+        </button>
+      {/each}
+    </div>
+  </div>
+
   {#if error}
     <div class="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
       {error}
@@ -138,14 +247,14 @@ async function handleSubmit() {
     <div class="space-y-2">
       <Label>Provider</Label>
       <Select.Root type="single" bind:value={selectedProvider} disabled={submitting}>
-        <Select.Trigger>
+        <Select.Trigger class="w-full">
           {#if selectedProvider}
             <span>{selectedProvider}</span>
           {:else}
             <span class="text-muted-foreground">Select a provider</span>
           {/if}
         </Select.Trigger>
-        <Select.Content>
+        <Select.Content class="w-[var(--bits-select-trigger-width)]">
           {#each $providers as p (p.name)}
             <Select.Item value={p.name} label={p.name} />
           {/each}
@@ -156,16 +265,19 @@ async function handleSubmit() {
     <div class="space-y-2">
       <Label>IDE</Label>
       <Select.Root type="single" bind:value={selectedIde} disabled={submitting}>
-        <Select.Trigger>
+        <Select.Trigger class="w-full">
           {#if selectedIde}
-            <span>{IDE_OPTIONS.find((i) => i.value === selectedIde)?.label ?? selectedIde}</span>
+            <span>{ALL_IDES.find((i) => i.value === selectedIde)?.label ?? selectedIde}</span>
           {:else}
             <span class="text-muted-foreground">Select an IDE</span>
           {/if}
         </Select.Trigger>
-        <Select.Content>
-          {#each IDE_OPTIONS as ide (ide.value)}
-            <Select.Item value={ide.value} label={ide.label} />
+        <Select.Content class="max-h-80 w-[var(--bits-select-trigger-width)]">
+          {#each IDE_GROUPS as group (group.label)}
+            <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">{group.label}</div>
+            {#each group.options as ide (ide.value)}
+              <Select.Item value={ide.value} label={ide.label} />
+            {/each}
           {/each}
         </Select.Content>
       </Select.Root>

@@ -72,6 +72,8 @@ fn main() {
             commands::logs::workspace_log_read,
             commands::contexts::context_list,
             commands::contexts::context_use,
+            commands::contexts::context_options,
+            commands::contexts::context_set_options,
             commands::system::devpod_version,
             commands::ssh_keys::ssh_key_list,
             commands::ssh_keys::ssh_key_generate,

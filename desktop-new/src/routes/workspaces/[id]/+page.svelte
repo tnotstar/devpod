@@ -30,13 +30,26 @@ import { formatTimestamp } from "$lib/utils/time.js"
 
 const IDE_OPTIONS = [
   { value: "vscode", label: "VS Code" },
-  { value: "openvscode", label: "OpenVSCode" },
-  { value: "intellij", label: "IntelliJ" },
+  { value: "vscode-insiders", label: "VS Code Insiders" },
+  { value: "cursor", label: "Cursor" },
+  { value: "windsurf", label: "Windsurf" },
+  { value: "codium", label: "VSCodium" },
+  { value: "positron", label: "Positron" },
+  { value: "openvscode", label: "OpenVSCode (Browser)" },
+  { value: "zed", label: "Zed" },
+  { value: "intellij", label: "IntelliJ IDEA" },
   { value: "goland", label: "GoLand" },
   { value: "pycharm", label: "PyCharm" },
+  { value: "phpstorm", label: "PhpStorm" },
+  { value: "webstorm", label: "WebStorm" },
+  { value: "rustrover", label: "RustRover" },
+  { value: "clion", label: "CLion" },
+  { value: "rider", label: "Rider" },
+  { value: "rubymine", label: "RubyMine" },
   { value: "fleet", label: "Fleet" },
   { value: "jupyternotebook", label: "Jupyter Notebook" },
-  { value: "none", label: "None" },
+  { value: "rstudio", label: "RStudio" },
+  { value: "none", label: "None (SSH only)" },
 ]
 
 let id = $derived($page.params.id as string)
@@ -404,16 +417,16 @@ async function handleDelete() {
       </Tabs.Content>
 
       <Tabs.Content value="terminal">
-        <div class="mt-4">
+        <div class="mt-4 flex flex-col" style="height: calc(100vh - 20rem);">
           {#if sshSessionId}
-            <div class="h-96 rounded-md border overflow-hidden">
+            <div class="min-h-0 flex-1 rounded-md border overflow-hidden">
               <TerminalComponent sessionId={sshSessionId} onExit={handleSshExit} />
             </div>
-            <div class="mt-2 flex justify-end">
+            <div class="mt-2 flex justify-end shrink-0">
               <Button variant="outline" size="sm" onclick={handleDisconnect}>Disconnect</Button>
             </div>
           {:else}
-            <div class="flex h-96 items-center justify-center rounded-md border bg-muted/50">
+            <div class="flex min-h-0 flex-1 items-center justify-center rounded-md border bg-muted/50">
               <div class="text-center">
                 <p class="text-muted-foreground">No active terminal session.</p>
                 <Button size="sm" class="mt-3" onclick={handleConnect} disabled={connecting}>

@@ -4,6 +4,7 @@ import { goto } from "$app/navigation"
 import { onMount, onDestroy } from "svelte"
 import Sidebar from "$lib/components/layout/Sidebar.svelte"
 import ThemeSwitcher from "$lib/components/layout/ThemeSwitcher.svelte"
+import NotificationHistory from "$lib/components/layout/NotificationHistory.svelte"
 import Toaster from "$lib/components/layout/Toaster.svelte"
 import CommandPalette from "$lib/components/layout/CommandPalette.svelte"
 import Breadcrumbs from "$lib/components/layout/Breadcrumbs.svelte"
@@ -71,7 +72,10 @@ onDestroy(() => {
   <div class="flex flex-1 flex-col overflow-hidden">
     <header class="flex h-12 items-center justify-between border-b px-4">
       <Breadcrumbs />
-      <ThemeSwitcher />
+      <div class="flex items-center gap-1">
+        <NotificationHistory />
+        <ThemeSwitcher />
+      </div>
     </header>
 
     <main class="flex-1 overflow-auto p-6">
