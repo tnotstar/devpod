@@ -5,7 +5,6 @@ import { goto } from "$app/navigation"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Separator } from "$lib/components/ui/separator/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
-import CreateWorkspaceSheet from "$lib/components/workspace/CreateWorkspaceSheet.svelte"
 import { workspaces } from "$lib/stores/workspaces.js"
 import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
@@ -15,7 +14,6 @@ import { toasts } from "$lib/stores/toasts.js"
 import type { AuditEntry } from "$lib/types/index.js"
 import { formatTimestamp } from "$lib/utils/time.js"
 
-let createSheetOpen = $state(false)
 let activity = $state<AuditEntry[]>([])
 
 onMount(async () => {
@@ -127,7 +125,7 @@ async function quickStop(wsId: string) {
   </div>
 
   <div class="flex gap-2">
-    <Button onclick={() => (createSheetOpen = true)}>New Workspace</Button>
+    <Button onclick={() => goto("/workspaces?create=true")}>New Workspace</Button>
     <Button variant="outline" onclick={() => goto("/providers/add")}>Add Provider</Button>
   </div>
 
@@ -207,5 +205,3 @@ async function quickStop(wsId: string) {
     {/if}
   </div>
 </div>
-
-<CreateWorkspaceSheet bind:open={createSheetOpen} />

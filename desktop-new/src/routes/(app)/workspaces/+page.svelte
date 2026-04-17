@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "@lucide/svelte"
 import { goto } from "$app/navigation"
+import { page } from "$app/stores"
 import { Button } from "$lib/components/ui/button/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js"
@@ -31,6 +32,12 @@ import { timeAgo } from "$lib/utils/time.js"
 
 let createSheetOpen = $state(false)
 let search = $state("")
+
+$effect(() => {
+  if ($page.url.searchParams.get("create") === "true") {
+    createSheetOpen = true
+  }
+})
 let sortBy = $state<"recent" | "name">("recent")
 
 let actingOn = $state<string | null>(null)
