@@ -17,6 +17,11 @@ Rewrite of the DevPod desktop app using **Tauri v2 + SvelteKit + shadcn-svelte**
 
 ### Prerequisites
 
+Install the following tools before building:
+
+- [Task](https://taskfile.dev/) — task runner used for all build commands
+- [GoReleaser](https://goreleaser.com/) — used by Task to build the Go CLI binary
+
 The desktop app shells out to the `devpod` CLI binary for all operations. Build it first or the app will fail at startup:
 
 ```bash
