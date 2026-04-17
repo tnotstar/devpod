@@ -7,7 +7,6 @@ import * as Command from "$lib/components/ui/command/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import { Label } from "$lib/components/ui/label/index.js"
 import * as Popover from "$lib/components/ui/popover/index.js"
-import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
 import * as Sheet from "$lib/components/ui/sheet/index.js"
 import { Spinner } from "$lib/components/ui/spinner/index.js"
 import LogTable from "$lib/components/log/LogTable.svelte"
@@ -382,10 +381,10 @@ async function handleSubmit() {
               Copy
             </Button>
           </div>
-          <ScrollArea class="max-h-96 rounded-md border">
+          <div class="max-h-96 overflow-auto rounded-md border">
             <LogTable lines={outputLines} />
             <div bind:this={outputEl}></div>
-          </ScrollArea>
+          </div>
         </div>
       {/if}
     </div>

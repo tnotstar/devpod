@@ -11,7 +11,6 @@ import * as Popover from "$lib/components/ui/popover/index.js"
 import { Separator } from "$lib/components/ui/separator/index.js"
 import * as Accordion from "$lib/components/ui/accordion/index.js"
 import * as Tabs from "$lib/components/ui/tabs/index.js"
-import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
 import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
 import LogTable from "$lib/components/log/LogTable.svelte"
 import TerminalComponent from "$lib/components/terminal/Terminal.svelte"
@@ -502,7 +501,7 @@ async function handleDelete() {
                     </Button>
                   </div>
                 {/if}
-                <ScrollArea class="max-h-96 rounded-md border">
+                <div class="max-h-96 overflow-auto rounded-md border">
                   {#if outputLines.length === 0}
                     <div class="flex items-center justify-center p-4">
                       <p class="text-sm text-muted-foreground">
@@ -513,7 +512,7 @@ async function handleDelete() {
                     <LogTable lines={outputLines} />
                     <div bind:this={tableEndEl}></div>
                   {/if}
-                </ScrollArea>
+                </div>
               </Accordion.Content>
             </Accordion.Item>
 
@@ -560,13 +559,13 @@ async function handleDelete() {
                           </div>
                         </div>
                         <Accordion.Content>
-                          <ScrollArea class="max-h-96 rounded-md border">
+                          <div class="max-h-96 overflow-auto rounded-md border">
                             {#if selectedLog === entry.filename}
                               <LogTable lines={logContent.split("\n")} />
                             {:else}
                               <p class="p-4 text-sm text-muted-foreground">Loading...</p>
                             {/if}
-                          </ScrollArea>
+                          </div>
                         </Accordion.Content>
                       </Accordion.Item>
                     {/each}
