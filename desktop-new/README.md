@@ -15,6 +15,25 @@ Rewrite of the DevPod desktop app using **Tauri v2 + SvelteKit + shadcn-svelte**
 
 ## Getting Started
 
+### Prerequisites
+
+The desktop app shells out to the `devpod` CLI binary for all operations. Build it first or the app will fail at startup:
+
+```bash
+# From the repo root — build the CLI binary
+go build -o devpod ./cmd/devpod
+
+# Place it somewhere on your PATH
+cp devpod /usr/local/bin/
+# — or next to the Tauri binary (src-tauri/target/debug/)
+```
+
+The Rust backend resolves the binary in this order:
+1. Same directory as the desktop executable
+2. System `PATH`
+
+### Development
+
 ```bash
 cd desktop-new
 npm install
@@ -22,7 +41,7 @@ npm install
 # Browser-only dev (mock IPC, no Rust compilation)
 npm run dev          # http://localhost:1420
 
-# Full Tauri dev (requires Rust toolchain)
+# Full Tauri dev (requires Rust toolchain + devpod binary)
 npm run desktop:dev
 
 # Type-check
