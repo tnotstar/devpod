@@ -3,7 +3,10 @@ import { toasts } from "$lib/stores/toasts.js"
 import type { Toast } from "$lib/stores/toasts.js"
 import { fly } from "svelte/transition"
 import { onDestroy } from "svelte"
-import { CheckCircle, XCircle, Info, X } from "lucide-svelte"
+import CircleCheck from "@lucide/svelte/icons/circle-check"
+import CircleX from "@lucide/svelte/icons/circle-x"
+import Info from "@lucide/svelte/icons/info"
+import X from "@lucide/svelte/icons/x"
 
 // Track timers per toast so we can pause/resume on hover
 let timers = $state<
@@ -92,9 +95,9 @@ function progressBarColor(variant: Toast["variant"]): string {
         transition:fly={{ x: 100, duration: 200 }}
       >
         {#if toast.variant === "success"}
-          <CheckCircle class="h-4 w-4 shrink-0" />
+          <CircleCheck class="h-4 w-4 shrink-0" />
         {:else if toast.variant === "error"}
-          <XCircle class="h-4 w-4 shrink-0" />
+          <CircleX class="h-4 w-4 shrink-0" />
         {:else}
           <Info class="h-4 w-4 shrink-0" />
         {/if}

@@ -1,5 +1,9 @@
 <script lang="ts">
-import { Bell, CheckCircle, XCircle, Info, Trash2 } from "lucide-svelte"
+import Bell from "@lucide/svelte/icons/bell"
+import CircleCheck from "@lucide/svelte/icons/circle-check"
+import CircleX from "@lucide/svelte/icons/circle-x"
+import Info from "@lucide/svelte/icons/info"
+import Trash2 from "@lucide/svelte/icons/trash-2"
 import { Button } from "$lib/components/ui/button/index.js"
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
@@ -47,9 +51,9 @@ function formatTime(ts: number): string {
         {#each $notificationHistory as item (item.id)}
           <div class="flex items-start gap-2 px-3 py-2.5">
             {#if item.variant === "success"}
-              <CheckCircle class="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+              <CircleCheck class="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
             {:else if item.variant === "error"}
-              <XCircle class="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <CircleX class="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
             {:else}
               <Info class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             {/if}

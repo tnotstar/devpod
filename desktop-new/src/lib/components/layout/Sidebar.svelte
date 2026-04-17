@@ -6,17 +6,15 @@ import { providers } from "$lib/stores/providers.js"
 import { machines } from "$lib/stores/machines.js"
 import { contexts } from "$lib/stores/contexts.js"
 import { togglePalette } from "$lib/stores/command-palette.js"
-import {
-  LayoutDashboard,
-  Box,
-  Plug,
-  Server,
-  Layers,
-  TerminalSquare,
-  KeyRound,
-  Settings,
-  Search,
-} from "lucide-svelte"
+import LayoutDashboard from "@lucide/svelte/icons/layout-dashboard"
+import Box from "@lucide/svelte/icons/box"
+import Plug from "@lucide/svelte/icons/plug"
+import Server from "@lucide/svelte/icons/server"
+import Layers from "@lucide/svelte/icons/layers"
+import SquareTerminal from "@lucide/svelte/icons/square-terminal"
+import KeyRound from "@lucide/svelte/icons/key-round"
+import Settings from "@lucide/svelte/icons/settings"
+import Search from "@lucide/svelte/icons/search"
 
 let { terminalCount = 0 }: { terminalCount?: number } = $props()
 </script>
@@ -34,7 +32,7 @@ let { terminalCount = 0 }: { terminalCount?: number } = $props()
     <SidebarItem href="/providers" label="Providers" badgeCount={$providers.length} icon={Plug} />
     <SidebarItem href="/machines" label="Machines" badgeCount={$machines.length} icon={Server} />
     <SidebarItem href="/contexts" label="Contexts" badgeCount={$contexts.length} icon={Layers} />
-    <SidebarItem href="/terminals" label="Terminals" badgeCount={terminalCount} icon={TerminalSquare} />
+    <SidebarItem href="/terminals" label="Terminals" badgeCount={terminalCount} icon={SquareTerminal} />
     <SidebarItem href="/ssh-keys" label="SSH Keys" icon={KeyRound} />
 
     <div class="flex-1"></div>
