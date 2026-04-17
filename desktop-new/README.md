@@ -21,10 +21,10 @@ The desktop app shells out to the `devpod` CLI binary for all operations. Build 
 
 ```bash
 # From the repo root — build the CLI binary
-go build -o devpod ./cmd/devpod
+task cli:build:dev
 
-# Place it somewhere on your PATH
-cp devpod /usr/local/bin/
+# The binary lands in dist/ — place it on your PATH
+cp dist/devpod-dev_*/devpod /usr/local/bin/
 # — or next to the Tauri binary (src-tauri/target/debug/)
 ```
 
