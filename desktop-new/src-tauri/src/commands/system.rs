@@ -5,7 +5,7 @@ use tauri::{Manager, State};
 #[tauri::command]
 pub async fn app_ready(app: tauri::AppHandle) -> Result<(), String> {
     // Close splash screen and show main window
-    if let Some(splash) = app.get_webview_window("splash") {
+    if let Some(splash) = app.get_webview_window("splashscreen") {
         let _ = splash.close();
     }
     if let Some(main) = app.get_webview_window("main") {

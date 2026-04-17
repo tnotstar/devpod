@@ -40,9 +40,9 @@
         "resizable": true
       },
       {
-        "label": "splash",
+        "label": "splashscreen",
         "title": "DevPod",
-        "url": "splash.html",
+        "url": "/splashscreen",
         "width": 380,
         "height": 420,
         "resizable": false,

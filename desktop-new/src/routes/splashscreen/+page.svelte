@@ -1,19 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<svelte:head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f0f12;
+      overflow: hidden;
+    }
+  </style>
+</svelte:head>
+
+<div class="splash">
+  <div class="container">
+    <div class="logo">
+      <svg viewBox="0 0 24 24">
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+        <path d="m3.3 7 8.7 5 8.7-5"/>
+        <path d="M12 22V12"/>
+      </svg>
+    </div>
+    <h1>DevPod</h1>
+    <p>Initializing workspace engine&hellip;</p>
+    <div class="spinner"></div>
+  </div>
+</div>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    height: 100%;
+  .splash {
+    height: 100vh;
+    width: 100vw;
     background: #0f0f12;
     color: #e4e4e7;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -68,20 +88,3 @@
     to { opacity: 1; transform: translateY(0); }
   }
 </style>
-</head>
-<body>
-  <div class="container">
-    <div class="logo">
-      <!-- Box icon (matches Lucide Box used in sidebar branding) -->
-      <svg viewBox="0 0 24 24">
-        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-        <path d="m3.3 7 8.7 5 8.7-5"/>
-        <path d="M12 22V12"/>
-      </svg>
-    </div>
-    <h1>DevPod</h1>
-    <p>Initializing workspace engine&hellip;</p>
-    <div class="spinner"></div>
-  </div>
-</body>
-</html>
