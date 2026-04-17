@@ -348,25 +348,19 @@ async function handleDelete() {
   </div>
 
   <div class="flex items-center gap-2">
-    {#if isRunning}
-      <Button size="sm" onclick={handleOpenIde} disabled={operationRunning}>
-        Open IDE
-      </Button>
-    {/if}
+    <Button size="sm" onclick={handleOpenIde} disabled={!isRunning || operationRunning}>
+      Open IDE
+    </Button>
+    <Button size="sm" onclick={handleStart} disabled={!isStopped || operationRunning || connecting}>
+      {operationRunning && isStopped ? "Starting..." : "Start"}
+    </Button>
+    <Button variant="outline" size="sm" onclick={handleStop} disabled={(!isRunning && !isBusy) || operationRunning}>Stop</Button>
     {#if sshSessionId}
       <Button variant="outline" size="sm" onclick={handleDisconnect}>Disconnect</Button>
-    {:else if isRunning}
-      <Button variant="outline" size="sm" onclick={handleConnect} disabled={connecting}>
+    {:else}
+      <Button variant="outline" size="sm" onclick={handleConnect} disabled={!isRunning || connecting}>
         {connecting ? "Connecting..." : "SSH Terminal"}
       </Button>
-    {/if}
-    {#if isStopped}
-      <Button size="sm" onclick={handleStart} disabled={operationRunning || connecting}>
-        {operationRunning ? "Starting..." : "Start"}
-      </Button>
-    {/if}
-    {#if isRunning || isBusy}
-      <Button variant="outline" size="sm" onclick={handleStop} disabled={operationRunning}>Stop</Button>
     {/if}
     <Button variant="outline" size="sm" onclick={handleRebuild} disabled={operationRunning}>Rebuild</Button>
     <Button variant="outline" size="sm" onclick={handleReset} disabled={operationRunning}>Reset</Button>
