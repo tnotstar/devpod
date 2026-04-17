@@ -305,7 +305,7 @@ async function handleDelete() {
 }
 </script>
 
-<div class="space-y-6">
+<div class="flex min-h-0 flex-1 flex-col gap-6">
   <div class="flex items-center gap-4">
     <Button variant="ghost" size="sm" onclick={() => goto("/workspaces")}>
       &larr; Back
@@ -353,7 +353,7 @@ async function handleDelete() {
   {#if !workspace}
     <p class="text-muted-foreground">Workspace not found.</p>
   {:else}
-    <Tabs.Root bind:value={activeTab}>
+    <Tabs.Root bind:value={activeTab} class="min-h-0 flex-1">
       <Tabs.List variant="line">
         <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
         <Tabs.Trigger value="output">Live Output</Tabs.Trigger>
@@ -429,8 +429,8 @@ async function handleDelete() {
         </div>
       </Tabs.Content>
 
-      <Tabs.Content value="output">
-        <div class="mt-4 flex flex-col" style="height: calc(100vh - 20rem);">
+      <Tabs.Content value="output" class="min-h-0 flex-1">
+        <div class="mt-4 flex min-h-0 flex-1 flex-col h-full">
           {#if outputLines.length > 0}
             <div class="flex justify-end gap-2 shrink-0 mb-2">
               <Button variant="outline" size="sm" onclick={() => copyToClipboard(outputLines.map(stripAnsi).join("\n"))}>
@@ -481,8 +481,8 @@ async function handleDelete() {
         </div>
       </Tabs.Content>
 
-      <Tabs.Content value="terminal">
-        <div class="mt-4 flex flex-col" style="height: calc(100vh - 20rem);">
+      <Tabs.Content value="terminal" class="min-h-0 flex-1">
+        <div class="mt-4 flex min-h-0 flex-1 flex-col h-full">
           {#if sshSessionId}
             <div class="min-h-0 flex-1 rounded-md border overflow-hidden">
               <TerminalComponent sessionId={sshSessionId} onExit={handleSshExit} />
