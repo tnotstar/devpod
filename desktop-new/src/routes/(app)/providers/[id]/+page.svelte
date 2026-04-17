@@ -9,6 +9,7 @@ import { Separator } from "$lib/components/ui/separator/index.js"
 import * as Select from "$lib/components/ui/select/index.js"
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
 import ConfirmDialog from "$lib/components/layout/ConfirmDialog.svelte"
+import ProviderIcon from "$lib/components/provider/ProviderIcon.svelte"
 import { providers } from "$lib/stores/providers.js"
 import {
   providerUse,
@@ -156,6 +157,7 @@ async function handleSaveOptions() {
     <Button variant="ghost" size="sm" onclick={() => goto("/providers")}>
       &larr; Back
     </Button>
+    <ProviderIcon name={id} class="size-6 text-muted-foreground" />
     <h1 class="text-2xl font-bold">{id}</h1>
     {#if provider?.version}
       <span class={badgeVariants({ variant: "secondary" })}>{provider.version}</span>

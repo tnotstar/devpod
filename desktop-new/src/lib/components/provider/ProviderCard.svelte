@@ -1,5 +1,6 @@
 <script lang="ts">
 import { badgeVariants } from "$lib/components/ui/badge/index.js"
+import ProviderIcon from "./ProviderIcon.svelte"
 import ProviderSheet from "./ProviderSheet.svelte"
 import type { Provider } from "$lib/types/index.js"
 
@@ -21,6 +22,7 @@ function sourceDisplay(p: Provider): string {
 >
   <div class="flex items-start justify-between gap-3">
     <div class="flex items-center gap-2 min-w-0">
+      <ProviderIcon name={provider.name} class="size-5 shrink-0 text-muted-foreground" />
       <h3 class="text-lg font-semibold truncate">{provider.name}</h3>
       {#if provider.isDefault}
         <span class={badgeVariants({ variant: "default" })}>default</span>

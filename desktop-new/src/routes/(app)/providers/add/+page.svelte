@@ -1,37 +1,22 @@
 <script lang="ts">
-import {
-  Container,
-  Terminal,
-  Ship,
-  Cloud,
-  Globe,
-  Server,
-  Droplets,
-} from "@lucide/svelte"
 import { goto } from "$app/navigation"
 import { get } from "svelte/store"
 import { Button } from "$lib/components/ui/button/index.js"
 import { Input } from "$lib/components/ui/input/index.js"
 import { Label } from "$lib/components/ui/label/index.js"
+import ProviderIcon from "$lib/components/provider/ProviderIcon.svelte"
 import { providerAdd } from "$lib/ipc/commands.js"
 import { providers } from "$lib/stores/providers.js"
 import { toasts } from "$lib/stores/toasts.js"
-const PROVIDERS: {
-  name: string
-  description: string
-  icon: typeof Container
-}[] = [
-  { name: "docker", description: "Local Docker containers", icon: Container },
-  { name: "ssh", description: "Remote SSH machines", icon: Terminal },
-  { name: "kubernetes", description: "Kubernetes clusters", icon: Ship },
-  { name: "aws", description: "Amazon Web Services", icon: Cloud },
-  { name: "gcloud", description: "Google Cloud Platform", icon: Globe },
-  { name: "azure", description: "Microsoft Azure", icon: Server },
-  {
-    name: "digitalocean",
-    description: "DigitalOcean Droplets",
-    icon: Droplets,
-  },
+
+const PROVIDERS = [
+  { name: "docker", description: "Local Docker containers" },
+  { name: "ssh", description: "Remote SSH machines" },
+  { name: "kubernetes", description: "Kubernetes clusters" },
+  { name: "aws", description: "Amazon Web Services" },
+  { name: "gcloud", description: "Google Cloud Platform" },
+  { name: "azure", description: "Microsoft Azure" },
+  { name: "digitalocean", description: "DigitalOcean Droplets" },
 ]
 
 let providerSource = $state("")
@@ -165,14 +150,13 @@ async function handleSubmit() {
     <h2 class="text-lg font-semibold">Providers</h2>
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {#each PROVIDERS as p (p.name)}
-        {@const Icon = p.icon}
         <button
           type="button"
           class="flex items-start gap-3 rounded-lg border bg-card p-4 text-left text-card-foreground shadow-sm transition-colors hover:bg-accent/50"
           disabled={submitting}
           onclick={() => handlePresetClick(p.name)}
         >
-          <Icon class="h-5 w-5 mt-0.5 shrink-0 text-muted-foreground" />
+          <ProviderIcon name={p.name} class="size-5 mt-0.5 shrink-0 text-muted-foreground" />
           <div>
             <div class="font-semibold">{p.name}</div>
             <div class="text-sm text-muted-foreground">{p.description}</div>
