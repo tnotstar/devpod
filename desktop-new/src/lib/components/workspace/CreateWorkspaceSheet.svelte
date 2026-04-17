@@ -10,6 +10,7 @@ import * as Popover from "$lib/components/ui/popover/index.js"
 import { ScrollArea } from "$lib/components/ui/scroll-area/index.js"
 import * as Sheet from "$lib/components/ui/sheet/index.js"
 import { Spinner } from "$lib/components/ui/spinner/index.js"
+import LogTable from "$lib/components/log/LogTable.svelte"
 import { workspaceUp } from "$lib/ipc/commands.js"
 import { onCommandProgress } from "$lib/ipc/events.js"
 import { providers } from "$lib/stores/providers.js"
@@ -171,7 +172,7 @@ let submitting = $state(false)
 
 let commandId = $state<string | null>(null)
 let outputLines = $state<string[]>([])
-let outputEl = $state<HTMLPreElement | null>(null)
+let outputEl = $state<HTMLDivElement | null>(null)
 let unlisten: UnlistenFn | null = null
 
 onDestroy(() => {
@@ -381,8 +382,9 @@ async function handleSubmit() {
               Copy
             </Button>
           </div>
-          <ScrollArea class="h-64 rounded-md border bg-muted/50 p-4">
-            <pre bind:this={outputEl} class="text-xs font-mono whitespace-pre-wrap">{outputLines.map(stripAnsi).join("\n")}</pre>
+          <ScrollArea class="max-h-96 rounded-md border">
+            <LogTable lines={outputLines} />
+            <div bind:this={outputEl}></div>
           </ScrollArea>
         </div>
       {/if}

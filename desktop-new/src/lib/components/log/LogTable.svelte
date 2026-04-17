@@ -10,12 +10,11 @@ let parsed = $derived(lines.map(parseLogLine))
 </script>
 
 <Table.Root class="w-full table-fixed {className}">
-  <Table.Header>
+  <Table.Header class="sticky top-0 z-10 bg-background">
     <Table.Row>
       <Table.Head class="w-20">Time</Table.Head>
       <Table.Head class="w-16">Level</Table.Head>
       <Table.Head>Message</Table.Head>
-      <Table.Head class="w-40 text-right">Source</Table.Head>
     </Table.Row>
   </Table.Header>
   <Table.Body>
@@ -45,7 +44,6 @@ let parsed = $derived(lines.map(parseLogLine))
           {/if}
         </Table.Cell>
         <Table.Cell class="text-sm truncate" title={line.message}>{line.message}</Table.Cell>
-        <Table.Cell class="font-mono text-xs text-muted-foreground text-right">{line.source}</Table.Cell>
       </Table.Row>
     {/each}
   </Table.Body>
